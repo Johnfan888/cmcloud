@@ -1,0 +1,9 @@
+<!-- welcome.html -->
+{% extends 'base.html'%}
+{% block title %} Welcome to Automon {% endblock %}
+{% block headmessage %}
+   <h3 style="font-family:arial">Choose one to edit</h3>
+{%endblock%}
+{% block content %}
+<li><a href='/app/describe_input'>Fault_describe</a></li> <br> <li><a href='/app/diagonos_input'>Fault_diagonos</a></li> <br> <li><a href='recovery_input'>Fault_recovery</a></li> 
+{%endblock%}
