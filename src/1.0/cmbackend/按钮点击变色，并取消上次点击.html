@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+//再次点击后字颜色恢复到蓝色，没有最初的样式了
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<style>
+a.select{color:#F00};/*选中的样式*/
+</style>
+<script>
+function btn(n)//每个按钮一个点击事件
+{
+	var a_num=document.getElementById("below").getElementsByTagName("a");//获取到按钮
+	for(i=0;i<a_num.length;i++)//遍历
+    {
+
+            a_num[i].className = i == n ? "select" : "";//将选中的按钮设置一个class为select即class=“select”，然后css就可以设置
+
+    }
+}
+</script>
+<div  id="below">
+     <a  onclick="btn(0)" href="#">按钮1</a>
+     <a  onclick="btn(1)" href="#">按钮2</a>
+     <a  onclick="btn(2)" href="#">按钮3</a>
+</div>
+</body>
+</html>

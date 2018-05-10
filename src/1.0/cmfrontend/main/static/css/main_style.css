@@ -1,0 +1,155 @@
+body{
+
+    margin:0px;
+    padding: 0px;
+
+
+}
+
+
+#container{
+    margin: 0px auto;
+    width: 100%;
+    height: 100%;
+    text-align: left;           /*所有文本左对齐*/
+
+}
+
+#banner{
+    margin:0px;          /*外边距，上右下左顺序四个参数，左右自动*/
+    padding: 0px;        /*内边距，上右下左顺序四个参数，左右自动*/
+    /*background: white;*/
+    height: 13%;
+    width: 30%;
+    float: left;
+    font-size: 27px;
+
+}
+#banner{
+      background-color: #fffffb;
+
+
+
+    font-family:"微软雅黑", "Dosis", sans-serif;
+
+    text-align: center;
+    font-weight: bold;
+    /*line-height:200px;*/
+    text-transform:uppercase;
+    /*position: relative;*/
+}
+#banner h1{
+    line-height: 18px;
+    /*background-color: #f4fdff;*/
+    color:#fefefe;
+    text-shadow:
+    0px 1px 0px #c0c0c0,
+    0px 2px 0px #b0b0b0,
+    0px 3px 0px #a0a0a0,
+    0px 4px 0px #909090,
+    0px 5px 10px rgba(0, 0, 0, 1.7);
+}
+
+/*#banner  {*/
+  /*font-family: "Avant Garde", Avantgarde,"Century Gothic", CenturyGothic, "AppleGothic", sans-serif;*/
+  /*font-size: 70px;*/
+  /*!*padding: 20px 10px;*!*/
+  /*text-align: center;*/
+  /*text-transform: uppercase;!*大写*!*/
+  /*text-rendering: optimizeLegibility;!*浏览器在绘制文本时将着重考虑易读性，而不是渲染速度和几何精度.它会使字间距和连字有效。*!*/
+/*}*/
+/*#banner  {*/
+
+  /*color: #131313;*/
+  /*background-color: #e7e5e4;*/
+  /*letter-spacing: .15em;  !*字的空隙*!*/
+  /*text-shadow: 1px -1px 0px*/
+  /*#767676, -1px 2px 1px #737272, -2px 4px 1px #767474, -3px 6px 1px*/
+  /*#787777, -4px 8px 1px #7b7a7a, -5px 10px 1px #7f7d7d, -6px 12px 1px*/
+  /*#828181, -7px 14px 1px #868585, -8px 16px 1px #8b8a89, -9px 18px 1px*/
+
+
+/*}*/
+
+
+#globllink{
+    margin:0px;
+    padding: 0px;
+    width: 70%;
+    height: 13%;
+    background: #fffffb;
+    font-size: 23px;
+    font-family: "Adobe 楷体 Std R";
+    float: left;
+
+}
+#globllink ul{
+    list-style-type: none;/*ul的左边图标去掉*/
+    padding:0px;
+    margin: 0px;
+
+
+
+}
+
+#globllink ul li{
+    float: left;
+    text-align: center;/*居中*/
+    width: 180px;
+    line-height: 85px;
+    text-decoration: none;
+
+
+}
+
+#globllink ul li a{
+    display: block;
+    padding: 9px 9px 9px 9px;
+    margin:0px;
+    text-decoration: none;
+
+}
+
+#globllink a:link,#globllink a:visited{
+    color: #a0a597;
+    /*text-decoration: underline;*/
+}
+
+/*鼠标悬浮*/
+#globllink a:hover{
+    color: #9fd2e6;
+    /*text-decoration: underline;*/
+}
+
+
+
+#middle{
+    margin:0px;
+    padding: 0px;
+    /*background: #ff5ae2;*/
+    height: 97%;
+    width: 100%;
+}         /*此处中间只有一个内容项，如果想要坐中右，需要设置float      而此时footer就需要clear：both清除浮动*/
+
+#footer{
+    margin:0px ;
+    padding: 0px;
+    background: #527aff;
+    height: 3%;
+    width: 100%;
+    text-align: center;
+
+
+}
+
+
+/*js控制*/
+a.select{
+    color: #a0a597 ;
+    background: rgba(208, 230, 219, 0.54);
+
+}/*按钮选中的样式*/
+
+a.notselect{
+    color: #a0a597;
+}/*没选中的样式*/

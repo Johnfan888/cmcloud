@@ -1,0 +1,44 @@
+<!DOCTYPE>
+<html>
+<head>
+    <title>下拉列表</title>
+    <meta charset="UTF-8">
+</head>
+
+<body onload="load()">
+    <div>
+        <select class='host' id='host' onchange='change()'>
+            <option value=''>--请选择--</option>
+        </select>
+        <select class='sub' id='sub'>
+            <option value=''>--请选择--</option>
+        </select>
+    </div>
+
+    <script>
+        var host_1=document.getElementById("host");
+        var sub_1=document.getElementById("sub");
+        var arr_host=new Array(new Option("--请选择--"),new Option("A"),new Option("B"));
+        var arr_sub=new Array();
+        arr_sub[0]=new Array(new Option("--请选择--"));
+        arr_sub[1]=new Array(new Option("a"),new Option("b"));
+        arr_sub[2]=new Array(new Option("X"),new Option("Y"),new Option("Z"));
+        //动态载入
+        function load(){
+            for(var i=0;i<arr_host.length;i++){
+                host_1.options[i]=arr_host[i];
+            }
+        }
+       
+        function change(){
+            //清空上次的选项
+            sub_1.options.length=0;
+            var index=host_1.selectedIndex;//selectedIndex可以返回下拉列表中的索引号
+            
+            for(var i=0;i<arr_sub[index].length;i++){
+               sub_1.options[i]=arr_sub[index][i];
+            }
+        }
+    </script>
+</body>
+</html>

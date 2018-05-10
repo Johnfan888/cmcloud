@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<head>
+    {% load staticfiles %}
+    <link rel="stylesheet" type="text/css" href= "{% static 'css/login_style.css' %}" />
+    <title>Automon</title>
+</head>
+
+<body>
+<h1>Automon</h1>
+<form method = 'post' enctype="multipart/form-data">
+    {% csrf_token %}
+    {{uf.as_p}}
+    <input type="submit" value = "ok" />
+</form>
+<br>
+<a href="http://127.0.0.1:8000/login/regist/">Register</a>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>联动测试</title>
+    <script>
+        function change_click() {
+            var json = "[{\"class\":\"111\",\"text\":\"aaa\"},{\"class\":\"111\",\"text\":\"bbb\"},{\"class\":\"111\",\"text\":\"ccc\"},{\"class\":\"222\",\"text\":\"ddd\"},{\"class\":\"222\",\"text\":\"eee\"},{\"class\":\"222\",\"text\":\"fff\"}]";
+
+            var jsonobj = JSON.parse(json);
+
+
+            var select = document.getElementById("itemgroups");
+            var select2 = document.getElementById("one");
+            var select_content = "";//动态拼接select的内容，插入即可
+            for (var i = 0; i < jsonobj.length; i++) {
+                if (jsonobj[i].class == select2.value) {
+                    select_content += " <option class=" + jsonobj[i].class + ">" + jsonobj[i].text + "</option>";
+                }
+            }
+            select.innerHTML = select_content;
+        }
+
+    </script>
+</head>
+<body>
+<select id="one" onchange="change_click()">
+    <option value="111">刘备</option>
+    <option value="222">关羽</option>
+</select>
+<select id="itemgroups">
+
+
+</select>
+
+<div id="show"></div>
+</body>
+</html>

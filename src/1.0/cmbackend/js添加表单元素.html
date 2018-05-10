@@ -1,0 +1,33 @@
+<html >
+<head>
+    <meta charset="UTF-8">
+<title>动态添加表单元素</title>
+</head>
+<script language="javascript">
+function AddElement(mytype){
+var mytype,TemO=document.getElementById("add");
+var newInput = document.createElement("input");
+newInput.type=mytype;
+newInput.name="input1";
+TemO.appendChild(newInput);
+var newline= document.createElement("br");
+TemO.appendChild(newline);
+}
+</script>
+<body>
+ <form action="" method="get" name="frm">
+ <div id="add">
+           <input type="text" name="textfield">
+
+</div>
+ </form>
+ <input name="" type="button" value="新建文本框" onClick="AddElement('text')" />
+ <input name="" type="button" value="新建复选框" onClick="AddElement('checkbox')" />
+  <input name="" type="button" value="新建单选框" onClick="AddElement('radio')" />
+  <input name="" type="button" value="新建文件域" onClick="AddElement('file')" />
+  <input name="" type="button" value="新建密码框" onClick="AddElement('password')" />
+  <input name="" type="button" value="新建提交按钮" onClick="AddElement('submit')" />
+  <input name="" type="button" value="新建恢复按钮" onClick="AddElement('reset')" />
+
+</body>
+</html>

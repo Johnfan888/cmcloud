@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="http://img.jb51.net/jslib/jquery/jquery.js" type="text/javascript"></script>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .manc,.masc{
+    border: 2px dotted burlywood;
+}
+    </style>
+<script>
+var collegediv =1;
+var collegename=1;
+function aa() {
+     var o=document.getElementById("man");
+     var div=document.createElement("div");
+     div.id = "man"+ collegediv;
+     div.className="manc"
+     var deletediv=document.createElement("div");
+     var deletename=o.childNodes.item(0).id+collegename;
+     div.innerHTML=o.innerHTML;
+     document.getElementById("div2").appendChild(div);
+     div.childNodes.item(0).id=deletename;
+     collegediv++;
+     collegename++;
+
+}
+function bb() {
+     var o=document.getElementById("mas");
+     var div=document.createElement("div");
+     div.id = "mas"+ collegediv;
+     div.className="masc";
+     var deletediv=document.createElement("div");
+     var deletename=o.childNodes.item(0).id+collegename;
+     div.innerHTML=o.innerHTML;
+     document.getElementById("div2").appendChild(div);
+     div.childNodes.item(0).id=deletename;
+     collegediv++;
+     collegename++;
+}
+function cc(obj)
+{
+    <!--var strid=obj.name;-->
+    //获取本删除按钮的id值，并创建对象
+    var strid=obj.id;
+    var o=document.getElementById(strid);
+    var z=o.parentElement;
+    <!--var o=document.getElementsByTagName(strid)[4].parentElement;-->
+    //找到这个删除按钮对应的父div的值
+    <!--var stridone=document.getElementsByName(strid)[0].parentNode.id;-->
+    var stridone=z.id;
+    //判断本id对应的值并删除
+    var my = document.getElementById(stridone);
+    if (my != null){
+    my.parentNode.removeChild(my);}
+    <!--window.location.reload(); -->
+}
+
+
+
+</script>
+</head>
+<body>
+<div id='div1'style="display: none;">
+
+    <div id="man" class="manc"><input type="button" value="删除本步骤" id="input" class="btn_list" onclick="cc(this)">
+<div id="operation1">
+  <p>Operation type:  Remote command
+  </p>
+  <p>
+      step<input style="width:50px;" name="from1"/>--<input style="width:50px;" name="to1"/>(0 - infinitely)
+  </p>
+  <p>
+      Step duration<input style="width:50px;" name="stepduration"/>(minimum 60 seconds, 0 - use action default)
+  </p>
+  <p>Opcommand host:
+    <label>
+        <select name="OpcommandhostId">
+            {% for host in host %}
+            <option value="{{ host.hostId }}" >{{ host.hostName }}</option>
+            {% endfor %}
+        </select>
+    </label>
+  </p>
+  <p>Commands:
+      <input name="commands"/>
+  </p>
+</div>
+<br />
+    </div>
+    </br>
+</div>
+<div id='div3'style="display: none;">
+    <div id="mas" class="masc"><input type="button" value="删除本步骤" id="input" class="btn_list" onclick="cc(this)">
+<div id="operation2">
+  <p>Operation type:  Send massage
+  </p>
+  <p>
+      step<input style="width:50px;" name="from2"/>--<input style="width:50px;" name="to2"/>(0 - infinitely)
+  </p>
+  <p>mediatype
+      <select name="mediatype">
+          <option value="4">163-Email</option>
+          <option value="2">local</option>
+      </select>
+  </p>
+</div>
+    </div>
+    </br>
+</div>
+
+<input type='button' id="btn1" value='Remote command' onclick="aa()"/>
+<input type='button' id="btn2" value='Send massage' onclick="bb()"/>
+<div id='div2'></div>
+</body>
+</html>

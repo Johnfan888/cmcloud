@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<head>
+    <script src="http://img.jb51.net/jslib/jquery/jquery.js" type="text/javascript"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>手写html</title>
+
+<script >
+var i=0;
+$(function(){
+$("#a").click(
+function(){
+	var text =$("<input type='text' id='"+i+"' value='"+i+"'/>" );
+	i=i+1;
+	$("#c").append(text);
+});
+
+$("#b").click(function(){
+	$("#"+(i-1)+"").remove();
+	i=i-1;
+});
+});
+</script>
+</head>
+<body>
+<div id="c"></div>
+<input type="button" value="点击增加"  id="a"/>
+<input type="button" value="点击删除"  id="b"/>
+</body>
+</html>

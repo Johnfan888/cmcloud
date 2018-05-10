@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html lang="en">
+<head>
+{#    {% load staticfiles %}#}
+{#    <link rel="stylesheet" type="text/css" href= "{% static 'css/add_hostgroups_style.css' %}" />#}
+    <meta charset="UTF-8">
+    <title>host groups</title>
+</head>
+<body>
+<form id="addhostgroups" name="addhostgroups" method="post" action="">
+  {% csrf_token %}
+  <p>Hostgroups name:
+  <input name="hostgroupsName" type="text" />
+  </p>
+  <p>
+    <input type="submit" name="Submit" value="ADD" />
+  </p>
+  <p>
+      Added：{{ b }}
+  </p>
+</form>
+</body>
+</html>

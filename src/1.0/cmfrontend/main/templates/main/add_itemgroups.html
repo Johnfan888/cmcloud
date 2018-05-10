@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html lang="en">
+<head>
+{#    {% load staticfiles %}#}
+{#    <link rel="stylesheet" type="text/css" href= "{% static 'css/add_hostgroups_style.css' %}" />#}
+    <meta charset="UTF-8">
+    <title>host groups</title>
+</head>
+<body>
+<form id="additemgroups" name="additemgroups" method="post" action="">
+  {% csrf_token %}
+  <p>Itemgroups name:
+  <input name="itemgroupsName" type="text" />
+  </p>
+  <p>Host:
+    <label>
+        <select name="hostId">
+            {% for host in host %}
+            <option value="{{ host.hostId }}" >{{ host.hostName }}</option>
+            {% endfor %}
+        </select>
+    </label>
+  </p>
+  <p>
+    <input type="submit" name="Submit" value="ADD" />
+  </p>
+  <p>
+      Added：{{ itemgroups_data }}
+  </p>
+</form>
+</body>
+</html>

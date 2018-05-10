@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html lang="en">
+<head>
+{#    {% load staticfiles %}#}
+{#    <link rel="stylesheet" type="text/css" href= "{% static 'css/add_hostgroups_style.css' %}" />#}
+    <meta charset="UTF-8">
+    <title>host templates</title>
+</head>
+<body>
+<form id="addtemplates" name="addtemplates" method="post" action="">
+  {% csrf_token %}
+  <p>Template name:
+  <input name="templateName" type="text" />
+  </p>
+     <p>Hostgroups:
+    <label>
+        <select name="hostgroupsId">
+            {% for hostgroups in hostgroups %}
+            <option value="{{ hostgroups.hostgroupsId }}" >{{ hostgroups.hostgroupsName }}</option>
+            {% endfor %}
+        </select>
+    </label>
+  </p>
+  <p>
+    <input type="submit" name="Submit" value="ADD" />
+  </p>
+  <p>
+      Added：{{ template_data }}
+  </p>
+</form>
+</body>
+</html>

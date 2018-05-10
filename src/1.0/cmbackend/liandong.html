@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <!--网站编码格式，UTF-8 国际编码，GBK或 gb2312 中文编码-->
+  <meta charset="UTF-8">
+  <meta name="Keywords" content="关键词一，关键词二">
+  <meta name="Description" content="网站描述内容">
+  <title>Document</title>
+  <!--css js 文件的引入-->
+ </head>
+ <body>
+  
+  <select id="Province"></select>
+  <select id="City" disabled="true"></select>
+  <select id="areas" disabled="true"></select>
+
+
+ <script type="text/javascript" src="http://img.jb51.net/jslib/jquery/jquery.js"></script>
+ <script type="text/javascript">
+	function Province(){
+		var _Province=[{"id":"1","name":"湖北省"},
+					   {"id":"2","name":"湖南省"},
+					   {"id":"3","name":"广东省"}];
+		var html="<option value=''>---请选择省份---</option>";
+		for(var i=0;i<_Province.length;i++){
+			html=html+"<option value='"+_Province[i].id+"'>"+_Province[i].name+"</option>"
+		}
+		$("#Province").append(html);
+	}
+	Province(); //调用函数
+
+	//点击省份，给城市赋值
+	var _city={ "1":["101#武汉","102#黄石市","103#十堰市"],
+				"2":["201#株洲","202#长沙","203#郴州"],
+				"3":["301#珠海市","301#汕头市","301#佛山市"]
+			   };
+	$("#Province").change(function(){
+		$("#City").children().remove(); //清除子元素
+		$("#areas").children().remove(); //清除子元素
+		$("#areas").attr("disabled",true);
+		var _index=$(this).val(); //获取序列号  1
+		var CityOption="<option value=''>---请选择城市---</option>";
+		arrCity=_city[_index]; //["株洲","长沙","郴州"]
+		for(var j=0;j<arrCity.length;j++){
+			c=arrCity[j].split("#"); /*101#武汉 用# 分隔成两个部，变成一个数组*/
+			CityOption=CityOption+"<option value='"+c[0]+"'>"+c[1]+"</option>";
+		}
+		$("#City").append(CityOption);
+		$("#City").attr("disabled",false);
+	});
+
+	//点击市，给地区赋值
+	var _areas={ "101":["江岸区","江汉区","硚口区"]
+				 //"102":[],
+				 //"103":[]
+				};
+	$("#City").change(function(){
+		
+		$("#areas").children().remove(); //清除子元素
+		var _index=$(this).val(); //获取序列号  101
+		var CityOption="<option value=''>---请选择地区---</option>";
+		arrarea=_areas[_index]; //["江岸区","江汉区","硚口区"]
+		for(var k=0;k<arrarea.length;k++){
+			CityOption=CityOption+"<option value=''>"+arrarea[k]+"</option>"
+		}
+		$("#areas").append(CityOption);
+		$("#areas").attr("disabled",false);
+	});
+
+ </script>
+
+
+<!--
+1-湖北省
+		1 -101 武汉
+				101 -江岸区
+				101 -江汉区
+				101 -硚口区
+		1 -102 黄石市
+		1 -103 十堰市
+		
+2-湖南省
+		2 -201 株洲
+				201 -天元区
+				201 -芦淞区
+				201 -荷塘区
+				201 -石峰区
+		2 -202 长沙
+		2 -203 郴州
+
+3-广东省
+		3 -301 珠海市
+		3 -302 汕头市
+		3 -303 佛山市
+
+
+-->
+
+
+ </body>
+</html>

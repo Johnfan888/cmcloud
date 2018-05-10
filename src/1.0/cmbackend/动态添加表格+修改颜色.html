@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>02-jQuery-动态创建表格案例</title>
+    <script src="http://img.jb51.net/jslib/jquery/jquery.js" type="text/javascript"></script>
+
+    <script>
+        var data = [{
+            name: "传智播客",
+            url: "http://www.itcast.cn",
+            type: "0"
+        },{
+            name: "黑马程序员",
+            url: "http://www.itheima.com",
+            type: "1"
+        },{
+            name: "传智前端学院",
+            url: "http://web.itcast.cn",
+            type: "1"
+        }];
+
+        $(function() {
+
+            // 动态创建表格的方式，使用动态创建dom对象的方式
+            //清空所有的子节点
+            $("#other").empty();
+            for (var i = 0; i < data.length; i++) {
+                //动态创建一个tr行标签,并且转换成jQuery对象
+                var $trTemp = $("<tr></tr>");
+
+                //往行里面追加 td单元格
+                $trTemp.append("<td>" + data[i].name + "</td>");
+                $trTemp.append("<td>" + data[i].url + "</td>");
+
+                if (data[i].type == 1) {//判断条件
+                     a="Enabled"
+
+                    $trTemp.append("<td style=\"color:#1cff0a\">" + a + "</td>");
+                }
+                else {
+                     a="Disabled"
+                    $trTemp.append("<td style=\"color:#ff0a11\">" + a + "</td>");
+                }
+                $trTemp.appendTo("#other");
+            }
+        })
+
+    </script>
+</head>
+<body>
+    <table rules="rows" frame="hsides" bordercolor="black">
+        <thead>
+            <tr>
+                <th>标题</th>
+                <th>地址</th>
+                <th>说明</th>
+            </tr>
+        </thead>
+        <tbody id="other">
+        </tbody>
+    </table>
+
+    <br>
+
+</body>
+</html>

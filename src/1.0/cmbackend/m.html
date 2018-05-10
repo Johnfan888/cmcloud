@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="http://img.jb51.net/jslib/jquery/jquery.js" type="text/javascript"></script>
+    <title>Document</title>
+    <style type="text/css">
+    .div_list{
+        display: block;
+        width: 100px;
+        height: 100px;
+        border: 1px solid #000;
+    }
+    .btn_list{
+        position: absolute;
+        left: 120px;
+    }
+
+    </style>
+    <script type="text/javascript">
+    window.onload = function(){
+
+
+    function div_elem(i){
+        a='<div id="d'+i+'" class="div_list"><p>command</p><input type="button" value="删除'+i+'" id="input'+i+'" class="btn_list"></div>'
+        b='<div id="d'+i+'" class="div_list"><p>massage</p><input type="button" value="删除'+i+'" id="input'+i+'" class="btn_list"></div>'
+
+        return a
+
+
+    }
+
+
+        //return '<div id="d'+n+'" class="div_list"><p>massage</p><input type="button" value="删除'+n+'" id="input'+n+'" class="btn_list"></div>';
+
+
+    function add_div(){
+
+        var odiv_add = document.getElementById('div_add');//要添加到的div
+        var obtn1 = document.getElementById('btn1');//触发按钮
+        var count1 = 0;
+
+
+        obtn1.onclick = function(){
+           var checkValue1=$("#type").val();
+           var div_data = '';
+               count1++;
+               for (var i = 0; i < count1; i++) {
+                   div_data += div_elem(i);
+               }
+
+
+        odiv_add.innerHTML =  div_data;
+        function btn_delete(){
+             var obtn_list = document.getElementsByClassName('btn_list');
+
+        for(var j = 0; j<obtn_list.length;j++){
+            (function(j){
+                obtn_list[j].onclick = function(){
+                    count1--;
+                    odiv_add.removeChild(odiv_add.childNodes[j]);
+                    btn_delete();
+                }
+            })(j);
+        }
+        }
+
+        btn_delete()
+        }
+
+    }
+
+    add_div();
+
+  }
+
+    </script>
+
+</head>
+<body>
+<div>
+<p>Operation type:
+    <select id="type">
+        <option value="1">Remote command</option>
+        <option value="2">Send massage</option>
+    </select>
+    <input type="button" id="btn1" value="增加" />
+</p>
+    <div id="div_add"></div>
+</div>
+</body>
+</html>

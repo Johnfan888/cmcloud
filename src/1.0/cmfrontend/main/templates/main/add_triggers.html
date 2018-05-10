@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html lang="en">
+<head>
+    {% load staticfiles %}
+    <link rel="stylesheet" type="text/css" href= "{% static 'css/add_triggers_style.css' %}" />
+    <script type="text/javascript">
+        var child; //通过判断子窗体的引用是否为空，可以控制它只能打开一个子窗体
+        function opendialog() {
+            if (!child) {
+                var url='http://127.0.0.1:8000/main/add_triggers_child/';                             //转向网页的地址;
+               var name='';                            //网页名称，可为空;
+               var iWidth=800;                          //弹出窗口的宽度;
+               var iHeight=500;                         //弹出窗口的高度;
+               //获得窗口的垂直位置
+               var iTop = (window.screen.availHeight - 30 - iHeight) / 2;
+               //获得窗口的水平位置
+               var iLeft = (window.screen.availWidth - 10 - iWidth) / 2;
+               //弹出窗口，并居中
+                window.open(url, name, 'height=' + iHeight + ',,innerHeight=' + iHeight + ',width=' + iWidth + ',innerWidth=' + iWidth + ',top=' + iTop + ',left=' + iLeft + ',status=no,toolbar=no,menubar=no,location=no,resizable=no,scrollbars=0,titlebar=no');
+                //需要等待子窗口加载完成，赋值才能成功,load事件通常用于检测文档内容或者图片是否加载完毕
+                {#child.onload = function() {#}
+                {#    child.document.getElementById('name').value = document.getElementById('name').value;#}
+                //}
+            }
+        }
+    </script>
+    <meta charset="UTF-8">
+    <title>triggers</title>
+</head>
+<body>
+<form id="addtriggers" name="addtriggers" method="post" action="">
+  {% csrf_token %}
+  <p>Triggers name:
+  <input name="triggersname" type="text" />
+  </p>
+  <p>Condition:
+  <input id="name" name="condition" type="text" />
+{#   弹出子窗口   #}
+  <input type="button" id="open" value="add" onclick="opendialog()" />
+  </p>
+  <p>Description:
+  <input name="description" type="text" />
+  </p>
+  <p>Severity:
+      <select id="severity" name="severity" >
+      <option value="0">Not classified</option>
+      <option value="1">Information</option>
+      <option value="2">Warning</option>
+      <option value="3">Average</option>
+      <option value="4">High</option>
+      <option value="5">Disater</option>
+  </select></p>
+
+  <p>
+    <input type="submit" name="Submit" value="ADD" />
+  </p>
+  <p>
+      Added：{{ trigger_data }}
+  </p>
+</form>
+</body>
+</html>

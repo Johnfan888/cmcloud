@@ -1,5 +1,0 @@
-zabbix_Config:
-  zabbix_url: http://192.168.18.25/zabbix/api_jsonrpc.php
-  zabbix_header: {"Content-Type": "application/json"}
-  zabbix_user: Admin
-  zabbix_pass: zabbix

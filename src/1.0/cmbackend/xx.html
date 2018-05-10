@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>联动测试</title>
+    <script>
+ {#$(document).ready(function() {#}
+ {#    $("#select_result").change(function () {   //为Select添加事件，当选择其中一项时触发#}
+ {#        var value1 = $("#select_result").attr("value");   //获取Select选中项的Value,一级菜单#}
+ {#        alert(value1);#}
+ {#    });#}
+ //{#})#}
+        /**
+         * 动态修改select的选中情况
+         * @param selectId
+         * @param checkValue
+         */
+        function set_select_checked(select, checkValue) {
+
+            for (var i = 0; i < select.options.length; i++) {
+                if (select.options[i].value == checkValue) {
+                    select.options[i].selected = true;
+                    break;
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+<select id="select_result" onchange="change_click()">
+    <option value="111">刘备</option>
+    <option value="222">关羽</option>
+</select>
+<select id="select" >
+    <option value="111">f</option>
+    <option value="111">d</option>
+    <option value="111">s</option>
+    <option value="111">g</option>
+    <option value="222">z</option>
+    <option value="222">vg</option>
+    <option value="222">g</option>
+</select>
+
+<div id="show"></div>
+</body>

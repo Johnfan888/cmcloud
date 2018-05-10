@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html lang="en">
+<head>
+    {% load staticfiles %}
+    <link rel="stylesheet" type="text/css" href= "{% static 'css/recovery_style.css' %}" />
+    <script src="http://img.jb51.net/jslib/jquery/jquery.js" type="text/javascript"></script>
+{#    <script src="{% static 'js/monitoring.js' %}"  type="text/javascript"></script>#}
+<script type="text/javascript">
+function returnvalue(tableID,obj) {
+    var rowIndex = obj.parentElement.parentElement.rowIndex;//获取点击按钮的这一行
+    var actionName =  $('table tr:eq('+rowIndex+') td:eq(1)').attr("id");;//获取要删除这一行的第二列内容id
+    alert(actionName)
+        //-------------------ajax EGT------------------------
+        $.ajax({
+            type:"get",
+            data: {'actionName':actionName},
+            url: "http://127.0.0.1:8000/main/recovery/", //后台处理函数的url 这里用的是static url 需要与urls.py中的name一致,或者直接写http地址
+            cache: false,
+            dataType: "json",
+            success: function(){
+                //$('#text').html(actionName)//返回给前端的值
+                alert("查询成功")
+                location.reload();//刷新当前页
+
+
+                                   },
+            error: function(){
+                alert("false");
+                              }
+        });
+}
+</script>
+    <meta name="monitoring" content="Automon" />
+    <title>monitoring</title>
+</head>
+<body>
+<div id="container_monitoring">
+    <div id="top">
+        Recover
+    </div>
+    <div id="middle">
+
+    <table id="recovery" rules="rows" frame="hsides" bordercolor="black" >
+{#    表格加边框，变细#}
+
+        <thead id="first" >
+            <td  style="width:20%" >Time</td>
+            <td  style="width:8%">Action Name</td>
+            <td  style="width:25%">Trigger</td>
+            <td  style="width:30%">Action Descriptions</td>
+            <td  style="width:37%">returnValue</td>
+        </thead>
+        {% for recovery in recovery %}
+
+        <tbody id="other" >
+            <td>{{ recovery.recoveryDate }}   {{recovery.recoveryTime  }}</td>
+            <td id="{{ recovery.actionName }}">{{ recovery.actionName }}</td>
+            <td >
+                Trigger status: {{ recovery.triggerStatus }}<br />
+                Trigger name: {{ recovery.triggerName }}
+            </td>
+            <td >
+                Trigger severity: {{ recovery.triggerSeverity }}<br />
+                Action name: {{ recovery.actionName }}<br />
+                Event ID: {{ recovery.eventId }}<br />
+                Event value: {{ recovery.eventValue }}<br />
+                Event status: {{ recovery.eventStatus }}<br />
+                Recovery time: {{ recovery.recoveryTime }}<br />
+                Recovery date: {{ recovery.recoveryDate }}<br />
+                Item values: {{ recovery.itemValues }}<br />
+                Original event ID:{{ recovery.originaleventID }}
+            </td>
+            <td>
+                <input type="button" id="returnvalue" value="returnvalue" onclick="returnvalue('other',this)" />
+                <p>{{ recovery.returnValue }}</p>
+            </td>
+            {% endfor %}
+        </tbody>
+
+    </table>
+
+    </div>
+
+</div>
+{#<div>qqqq{{ item }}</div>#}
+</body>
+</html>

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+#first {
+    font-size: 20px;
+}
+    </style>
+    <script src="http://img.jb51.net/jslib/jquery/jquery.js" type="text/javascript"></script>
+    <script type="text/javascript">//动态添加表格并按条件修改
+$(document).ready(function(){
+
+        $("#other ").empty("");//直接清除tbody，防止二次查询，第一次数据还在
+           var List1={{ data1 | safe }} ;//把这个js提出去这里就会报错，不能从后台获取data1
+           var action = JSON.parse(List1);//解析JSON字符串
+
+
+
+                    // 动态创建表格的方式，使用动态创建dom对象的方式
+                    //清空所有的子节点
+                    //$("#other").empty();
+                    for (var i = 0; i < action.length; i++) {
+
+                            //动态创建一个tr行标签,并且转换成jQuery对象
+                            var $trTemp = $("<tr></tr>");
+
+                            //往行里面追加 td单元格
+                            $trTemp.append("<td>" +   + "</td>");//加一个空的td作为自增序号
+                            $trTemp.append("<td id=" + action[i].pk +">" + action[i].fields.actionName + "</td>");
+
+
+                            if (action[i].fields.actionStatus == 0) {//判断条件
+                                a = "Enabled"
+
+                                $trTemp.append("<td style=\"color:#1cff0a\">" + a + "</td>");
+                            }
+                            else {
+                                a = "Disabled"
+                                $trTemp.append("<td style=\"color:#ff0a11\">" + a + "</td>");
+                            }
+                            $trTemp.append("<td><input  id=\"\" type=\"submit\" name=\"Submit\" value=\"Update\"/ ></td>");
+                            $trTemp.append("<td><input id=\"delete\" type=\"button\" name=\"delete\" value=\"Delete\"/ onclick=\"dd('other',this)\"></td>");
+                            $trTemp.appendTo("#other");
+                        }
+
+
+
+     })
+</script>
+    <script>//表格序号自增
+    $(function(){
+        //$('table tr:not(:first)').remove();
+        var len = $('table tr').length;
+        for(var i = 1;i<len;i++){
+            $('table tr:eq('+i+') td:first').text(i);
+        }
+
+});
+</script>
+<script>//删除
+function dd(tableID,obj) {
+
+     if(confirm("确定删除这一行嘛？")){
+        var rowIndex = obj.parentElement.parentElement.rowIndex;//获取点击按钮的这一行
+        var actionId =  $('table tr:eq('+rowIndex+') td:eq(1)').attr("id");;//获取要删除这一行的第二列内容id
+
+         //将要删除的name传送到后台去删除
+        //-------------------ajax EGT------------------------
+        $.ajax({
+            type:"get",
+            data: {'actionId':actionId},
+            url: "http://127.0.0.1:8000/main/view_action/", //后台处理函数的url 这里用的是static url 需要与urls.py中的name一致,或者直接写http地址
+            cache: false,
+            dataType: "json",
+            success: function(){
+                //$('#result').html(data.result)//返回给前端的值
+                 alert("已成功删除！")
+                                   },
+            error: function(){
+                alert("false");
+                              }
+        });
+        //-----------------------------------------------
+         //删除前端的行
+        obj.parentElement.parentElement.parentElement.deleteRow(rowIndex-1); //再简化：省略tableID参数
+
+
+         $(function(){//再次加id实现更新id
+        //$('table tr:not(:first)').remove();
+        var len = $('table tr').length;
+        for(var i = 1;i<len;i++){
+            $('table tr:eq('+i+') td:first').text(i);
+        }
+
+        });
+
+
+     }
+
+}
+</script>
+    <title>action</title>
+</head>
+<body>
+    <table id="action" style="width:60%" rules="rows" frame="hsides" bordercolor="black">
+        <thead id="first" >
+            <td id="a" style="width:20%">No.</td>
+            <td id="b" style="width:35%">ActionName</td>
+{#            <td id="c" style="width:20%">templateName</td>#}
+            <td id="d" style="width:5%">status</td>
+            <td style="width:8%;color:#fa1d04">Update</td>
+            <td style="width:8%;color:#fa1d04">Delete</td>
+        </thead>
+
+        <tbody id="other">
+
+        </tbody>
+
+    </table>
+
+</body>
+</html>

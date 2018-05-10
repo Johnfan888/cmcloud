@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html lang="en">
+<head>
+    {% load staticfiles %}
+{#连接外网的jquery，并连接自己的js#}
+<script src="http://img.jb51.net/jslib/jquery/jquery.js" type="text/javascript"></script>
+<script src="{% static 'js/add_items.js' %}"  type="text/javascript"></script>
+<script>
+{#从数据库取值需要加上safe不然乱码报错invalid property id#}
+       var List={{ data1 | safe }} ;//把这个js提出去这里就会报错，不能从后台获取data1
+       var jsonobj = JSON.parse(List);//解析JSON字符串
+        $(document).ready(function(){
+        $("#one").change(function() {
+            var checkValue=$("#one").val();//获取one的val
+            var select = document.getElementById("itemgroups");
+            var select_content=""//动态拼接select的内容
+            for(var i = 0; i < jsonobj.length; i++){
+                if (jsonobj[i].fields.hostId == checkValue) {
+                    select_content += " <option value=" + jsonobj[i].pk + ">" + jsonobj[i].fields.itemgroupsName + "</option>";
+                }
+            }
+
+            select.innerHTML = select_content;//innerHTML在JS是双向功能：获取对象的内容  或  向对象插入内容，这里在插入数据
+        })
+        })
+
+</script>
+{#<script>//验证其是有value的#}
+{#    $(document).ready(function(){#}
+{#        $("#itemgroups").change(function() {#}
+{#        var c=$("#itemgroups").val();//获取one的val#}
+{#         alert(c)#}
+{#        })#}
+{#        })#}
+{#</script>#}
+{#    <link rel="stylesheet" type="text/css" href= "{% static 'css/add_hostgroups_style.css' %}" />#}
+    <meta charset="UTF-8">
+    <title>items</title>
+</head>
+<body>
+<form id="additems" name="additems" method="post" action="">
+  {% csrf_token %}
+  <p>Item name:
+  <input name="itemName" type="text" />
+  </p>
+  <p>Item key:
+  <input name="itemKey" type="text" />
+  </p>
+  <p>
+  <p>Host:
+    <label>
+  <select id="one"  name="hostId" >
+            {#循环取出host中的hostid和hostname  #}
+            {% for host in host %}
+            <option value="{{ host.hostId }}" >{{ host.hostName }}</option>
+            {% endfor %}
+  </select>
+    </label>
+  </p>
+  <p>interfaceId:
+    <label>
+     {#循环取出interface中的interfaceid和interfacename  #}
+  {% for interface in interface %}
+  <select class="two" name="interfaceId" >
+
+            <option value="{{ interface.interfaceId }}" >{{ interface.interfaceId }}</option>
+
+  </select>
+  {% endfor %}
+    </label>
+  </p>
+{#创建value和datatype的二级联动#}
+  <p>Value Type:
+      <select id="one2" name="valuetype"> <option value="3">Numeric(unsigned)</option> <option value="0">Numeric(float)</option> <option value="1">character</option> <option value="2">log</option> <option value="4">text</option> </select>
+      Data Type:
+      <select class="two2" id="two22" name="datatype"> <option value="3">Boolean</option> <option value="1">Octal</option> <option value="0">Decimal</option> <option value="2">Hexadecimal</option></select>
+      <select class="two2" >  <option value="">none</option> </select>
+      <select class="two2" >  <option value="">none</option> </select>
+      <select class="two2" >  <option value="">none</option> </select>
+      <select class="two2" >  <option value="">none</option> </select>
+      Unit:
+      <input type="text" id="unitinput" name='unit' style="display:none;" />
+
+
+  </p>
+{#itemsgroups#}
+  <p>itemgroups:
+
+{#     循环取出itemgroups中的itemgroups和itemgroups#}
+  <select id="itemgroups" name="itemgroup">
+{#        {% for itemgroup in itemgroup %}#}
+{#            {% for host in host %}#}
+{#                {% if itemgroup.hostId == host.hostId %}#}
+{#            <option value="{{ itemgroup.itemgroupId }}" class="{{ itemgroup.hostId  }}" >{{ itemgroup.itemgroupsName }}</option>#}
+{#                {% endif %}#}
+{#            {% endfor %}#}
+{#        {% endfor %}#}
+
+  </select>
+  </p>
+  <p>Description:
+  <input name="description" type="text" />
+  </p>
+  <p>
+  <input type="submit" name="Submit" value="ADD" />
+  </p>
+  <p>
+      Added：{{ all_data }}
+  </p>
+</form>
+</body>
+</html>

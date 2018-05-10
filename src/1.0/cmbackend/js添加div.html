@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="http://img.jb51.net/jslib/jquery/jquery.js" type="text/javascript"></script>
+  <title> New Document </title>
+  <meta charset="utf-8" />
+        <style>
+                div {border: 1px solid #666;padding: 5px; margin: 5px;}
+                #divs {width: 200px;}
+                #div5 {background: #ccc;}
+        </style>
+</head>
+
+<body>
+
+        <div id="divs">
+
+                <div id="div2">div2</div>
+                <div id="div3">div3</div>
+
+                <input name="" type="button" value="新建" onClick="Add()" />
+        </div>
+
+        <script>
+
+var i=5;//定义一个自增id
+    function Add() {
+        i++;
+        var oDivs = document.getElementById('divs');
+        var oDiv3 = document.getElementById('div3'); //获取到div3，因为等下要把创建的div插入到div3前面。
+
+        var oDiv5 = document.createElement('div'); //创建一个div元素。
+
+        //oDiv5.id = i; //id样式可以先在样式表中写好，然后赋值一个id给创建出来的div元素。
+        xxx='<div id="div' + i + '"><input type="button" value="'+i+'" id="input'+i+'" class="btn_list" onclick="cc()">' +
+            '<p>这是一个有故事的div</p><input type="text" /><input type="radio"/></div>'
+        oDiv5.innerHTML = xxx;  //给创建出来的div添加内容，内容中可以有html标签嵌套。
+
+        oDivs.insertBefore(oDiv5, oDiv3); //在大的div元素下插入创建出来的元素，第一个参数是创建的div，第二个参数是要插入到哪个div前面。
+    }
+ </script>
+<script>
+function cc() {
+    var checkValue1=$(".btn_list").val();
+    var my = document.getElementById('div'+checkValue1);
+    my.parentNode.removeChild(my);
+
+
+
+}
+</script>
+
+</body>
+</html>

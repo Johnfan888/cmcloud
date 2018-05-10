@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="http://img.jb51.net/jslib/jquery/jquery.js" type="text/javascript"></script>
+
+<script>//添加
+/* 获取url中的参数*/
+$(function fun() {//$调用外部js？？
+    urlinfo = window.location.href; //获取当前页面的url
+    len = urlinfo.length;//获取url的长度
+    offset = urlinfo.indexOf("?");//设置参数字符串开始的位置
+    newsidinfo = urlinfo.substr(offset, len)//取出参数字符串 这里会获得类似“id=1”这样的字符串
+    newsids = newsidinfo.split("=");//对获得的参数字符串按照“=”进行分割
+    newsid1 = newsids[1];//得到第一个参数值hostname
+    newsid2 = newsids[2];//得到第二个参数值hostid
+    //newsname=newsids[0];//得到参数名字
+    hostName = newsid1.replace('%20', ' ');//空格传递过来会变为%20需要转换回来
+    hostId=newsid2
+//---------------------------------
+    document.getElementById("hostname").innerHTML = hostName;
+    $("#other ").empty("");//直接清除tbody，防止二次查询，第一次数据还在
+    var List1={{ data1 | safe }} ;//把这个js提出去这里就会报错，不能从后台获取data1
+    var trigger = JSON.parse(List1);//解析JSON字符串
+    var List2={{ data3 | safe }} ;//把这个js提出去这里就会报错，不能从后台获取data1
+    var item = JSON.parse(List2);//解析JSON字符串
+    for(var j = 0;j < item.length; j++){
+        if (item[j].fields.hostId == hostId) {
+            a=item[j].pk
+          //筛选出要查询主机所有的item
+        for (var i = 0; i < trigger.length; i++) {
+                if (trigger[i].fields.itemId == a) {
+                //动态创建一个tr行标签,并且转换成jQuery对象
+                var $trTemp = $("<tr></tr>");
+                //往行里面追加 td单元格
+                $trTemp.append("<td></td>");
+                $trTemp.append("<td id=" + trigger[i].pk + ">" + trigger[i].fields.triggerName + "</td>");
+                //-------------------------------------------------------------------
+                //下面为每行末尾添加删除更新按钮
+                $trTemp.append("<td><input  id=\"\" type=\"submit\" name=\"Submit\" value=\"Update\"/ ></td>");
+                $trTemp.append("<td><input id=\"delete\" type=\"button\" name=\"delete\" value=\"Delete\"/ onclick=\"dd('other',this)\"></td>");
+                //-------------------------------------------------------------------------------------------
+                $trTemp.appendTo("#other");//trtemp加入到表格
+
+            }
+                                                    }
+                                                    }
+    }
+})
+
+</script>
+<script>//表格序号自增
+    $(function(){
+        //$('table tr:not(:first)').remove();
+        var len = $('table tr').length;
+        for(var i = 1;i<len;i++){
+            $('table tr:eq('+i+') td:first').text(i);
+        }
+
+});
+</script>
+<script>//删除
+function dd(tableID,obj) {
+
+     if(confirm("确定删除这一行嘛？")){
+        var rowIndex = obj.parentElement.parentElement.rowIndex;//获取点击按钮的这一行
+        var triggerId =  $('table tr:eq('+rowIndex+') td:eq(1)').attr("id");;//获取要删除这一行的第二列内容id
+
+         //将要删除的name传送到后台去删除
+        //-------------------ajax EGT------------------------
+        $.ajax({
+            type:"get",
+            data: {'triggerId':triggerId},
+            url: "http://127.0.0.1:8000/main/view_triggers/", //后台处理函数的url 这里用的是static url 需要与urls.py中的name一致,或者直接写http地址
+            cache: false,
+            dataType: "json",
+            success: function(){
+                //$('#result').html(data.result)//返回给前端的值
+                 alert("已成功删除！")
+                                   },
+            error: function(){
+                alert("false");
+                              }
+        });
+        //-----------------------------------------------
+         //删除前端的行
+        obj.parentElement.parentElement.parentElement.deleteRow(rowIndex-1); //再简化：省略tableID参数
+
+
+         $(function(){//再次加id实现更新id
+        //$('table tr:not(:first)').remove();
+        var len = $('table tr').length;
+        for(var i = 1;i<len;i++){
+            $('table tr:eq('+i+') td:first').text(i);
+        }
+
+        });
+
+
+     }
+
+}
+</script>
+    <title>Trigger</title>
+</head>
+<body>
+<div id="top">
+    当前主机：<a id="hostname"></a>
+</div>
+<div>
+    <table rules="rows" frame="hsides" bordercolor="black">
+    <thead id="first">
+        <td style="width:20%;color:#fa1d04">No.</td>
+        <td style="width:30%;color:#fa1d04">TriggerName</td>
+        <td style="width:8%;color:#fa1d04">Update</td>
+        <td style="width:8%;color:#fa1d04">Delete</td>
+    </thead>
+    <tbody id="other">
+
+    </tbody>
+</table>
+</div>
+
+</body>
+</html>

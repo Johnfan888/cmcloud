@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html lang="en">
+<head>
+    {% load staticfiles %}
+    <link rel="stylesheet" type="text/css" href= "{% static 'css/main_style.css' %}" />
+    <meta name="main" content="Automon" />
+    <script>
+function btn(n)//每个按钮一个点击事件
+{
+	var a_num=document.getElementById("globllink").getElementsByTagName("a");//获取到按钮
+	for(i=0;i<a_num.length;i++)//遍历
+	{
+		a_num[i].className=i==n?"select":"notselect";//将选中的按钮设置一个class为select即class=“select”，然后css就可以设置
+
+ 	}
+}
+</script>
+    <title>Automon</title>
+</head>
+
+<body>
+<!--整体外层容器-->
+<div id="container">
+    <!--banner条-->
+    <div id="banner">
+       <h1>Automon</h1>
+    </div>
+    <!--全局导航条-->
+
+    <div id="globllink">
+        <ul>
+            <li><a href="http://127.0.0.1:8000/main/homepage/" target="content" onclick="btn(0)">Overview</a></li>
+            <li><a href="http://127.0.0.1:8000/main/add/" target="content" onclick="btn(1)">Configuration</a></li>
+            <li><a href="http://127.0.0.1:8000/main/monitoring/" target="content" onclick="btn(2)">Monitoring</a></li>
+            <li><a href="http://127.0.0.1:8000/main/diagnosis/" target="content" onclick="btn(3)">Diagnosis</a></li>
+            <li><a href="http://127.0.0.1:8000/main/recovery/" target="content" onclick="btn(4)">Recovery</a></li>
+        </ul>
+    </div >
+
+    <!--中间页-->
+    <iframe width="100%" height="80%" frameborder="0" allowtransparency="true"  name="content">
+    <div id="middle">
+
+    </div>
+    </iframe>
+    <!--脚注栏-->
+    <div id="footer">
+             ©联系我们  123456789@163.com
+    </div>
+</div>
+
+</body>
+</html>

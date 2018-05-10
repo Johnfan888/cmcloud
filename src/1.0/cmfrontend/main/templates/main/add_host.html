@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html lang="en">
+<head>
+    {% load staticfiles %}
+    <link rel="stylesheet" type="text/css" href= "{% static 'css/add_host_style.css' %}" />
+    <script src="{% static 'js/add_host.js' %}"  type="text/javascript"></script>
+
+    <meta charset="UTF-8">
+    <title>host</title>
+</head>
+<form id="addhost" name="addhost" method="post" action="">
+  {% csrf_token %}
+  <p>Host name:
+  <input name="hostName" type="text" />
+  </p>
+  <p>Host ip :
+    <input name="hostIp" type="text" />
+  </p>
+  <p>Hostroups:
+    <label>
+        <select   id="one" name="hostgroupsId" >
+            {% for hostgroups in hostgroups %}
+            <option value="{{ hostgroups.hostgroupsId }}" >{{ hostgroups.hostgroupsName }}</option>
+            {% endfor %}
+        </select>
+    </label>
+  </p>
+  <p>Template:
+    <label>
+        <select name="templatesId">
+
+            {% for templates in templates %}
+            <option value="{{ templates.templatesId }}" >{{ templates.templatesName }}</option>
+            {% endfor %}
+        </select>
+    </label>
+  </p>
+  <p>
+    <input type="submit" name="Submit" value="ADD" />
+  </p>
+  <p>
+      Added：{{ add_host_data }}
+{#      已添加主机信息：{{ templates }}#}
+  </p>
+
+
+</form>
+</html>
