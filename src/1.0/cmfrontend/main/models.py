@@ -9,6 +9,9 @@ class chost(models.Model):
     hostId = models.IntegerField(primary_key=True, max_length=8)
     hostName = models.CharField(max_length=255)
     hostStatus = models.IntegerField(max_length=2)
+    hostgroupsId = models.IntegerField(max_length=8)
+    templatesId = models.IntegerField(null=True,max_length=10)
+    hostIp = models.CharField(max_length=255)
 
 
     # 返回相应的值
@@ -27,10 +30,11 @@ class chostgroups(models.Model):
 class ctemplates(models.Model):
     templatesId = models.IntegerField(primary_key=True, max_length=8)
     templatesName = models.CharField(max_length=255)
+    hostgroupsId = models.IntegerField(max_length=8)
     # 返回相应的值
     def __unicode__(self):
          # return self.templatesId
-        return templatesId
+        return self.templatesId
 #主机接口表
 class cinterface(models.Model):
     interfaceId = models.IntegerField(primary_key=True, max_length=8)
@@ -50,7 +54,7 @@ class citemgroups(models.Model):
     # 返回相应的值
     def __unicode__(self):
          # return str(self.itemgroupsId)
-        return itemgroupsId
+        return self.itemgroupsId
 #监控表
 class citem(models.Model):
     itemId = models.IntegerField(primary_key=True, max_length=10)
@@ -59,10 +63,16 @@ class citem(models.Model):
     itemStatus = models.IntegerField(max_length=1)
     templateId = models.IntegerField(max_length=10)
     hostId = models.IntegerField(max_length=10)
+    interfaceId = models.IntegerField(max_length=8)
+    valuetype = models.IntegerField(null=True,max_length=2)
+    datatype = models.IntegerField(null=True,max_length=2)
+    units = models.CharField(null=True,max_length=255)
+    applicationId = models.IntegerField(null=True,max_length=10)
+    description = models.CharField(null=True,max_length=255)
 
     # 返回相应的值
     def __unicode__(self):
-         return itemId
+         return self.itemId
 
 #触发器表
 class ctrigger(models.Model):
@@ -71,6 +81,8 @@ class ctrigger(models.Model):
     triggerValue = models.IntegerField(max_length=10)
     triggerPriority = models.IntegerField(max_length=10)
     itemId = models.IntegerField(max_length=10)
+    triggerDescription = models.CharField(null=True,max_length=255)
+    condition = models.CharField(max_length=255)
     # 返回相应的值
     def __unicode__(self):
          return self.triggerId
@@ -96,7 +108,12 @@ class crecovery(models.Model):
 class caction(models.Model):
     actionId = models.IntegerField(primary_key=True, max_length=8)
     actionName = models.CharField(max_length=255)
-    actionStatus=models.IntegerField( max_length=8)
+    actionStatus = models.IntegerField( max_length=8)
+    actionStepPeriod = models.CharField(max_length=255)
+    triggerId = models.IntegerField(null=True,max_length=8)
+    actionCommand = models.CharField(null=True,max_length=255)
+    actionMessage = models.CharField(null=True, max_length=255)
+
 
 
     # 返回相应的值

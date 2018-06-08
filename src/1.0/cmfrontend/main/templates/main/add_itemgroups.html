@@ -3,18 +3,75 @@
 <head>
 {#    {% load staticfiles %}#}
 {#    <link rel="stylesheet" type="text/css" href= "{% static 'css/add_hostgroups_style.css' %}" />#}
+{#<script src="http://img.jb51.net/jslib/jquery/jquery.js" type="text/javascript"></script>#}
+{% load staticfiles %}
+<script src="{% static 'js/jquery.js' %}"  type="text/javascript"></script>
     <meta charset="UTF-8">
     <title>host groups</title>
+<script>
+ $(function update() {
+    urlinfo = window.location.href; //获取当前页面的url
+    len = urlinfo.length;//获取url的长度
+    offset = urlinfo.indexOf("?");//设置参数字符串开始的位置
+    newsidinfo = urlinfo.substr(offset, len)//取出参数字符串 这里会获得类似“id=1”这样的字符串
+    newsids = newsidinfo.split("=");//对获得的参数字符串按照“=”进行分割
+    updateitemgroupsId = newsids[1];//得到第一个参数值hostid
+    //alert(updatehostgroupsId)
+     $('#itemgroupsId').val(updateitemgroupsId)
+     //给后台一个判断添加还是更新的条件
+     var judge=$('#itemgroupsName').val()
+     if(judge.length == 0 ){
+         $('#judge').val(0)
+     }
+    //-------------------ajax EGT------------------------
+    if (updateitemgroupsId != undefined){//当界面是查看中跳转过来时执行
+        $.ajax({
+            type:"get",
+            data: {'updateitemgroupsId':updateitemgroupsId },
+            url: "http://{{ myhostip }}:8000/main/add_itemgroups/", //后台处理函数的url 这里用的是static url 需要与urls.py中的name一致,或者直接写http地址
+            cache: false,
+            dataType: "json",
+            success: function(data){
+                //返回给前端的值
+                 //alert("已成功！")
+                //alert(data[0])
+                {#//data不是一个字符串是一对象,需要转换#}
+                itemgroups=JSON.stringify(data[0])//取数组的第一个字符串，相当于去掉[]
+
+                //alert(hostgroups)
+                var itemgroups2 = JSON.parse(itemgroups)//解析
+                var itemgroupsName=itemgroups2['itemgroupsName']
+                var hostId=itemgroups2['hostId']
+                //alert(hostgroupsName)
+                $('#itemgroupsName').val(itemgroupsName)
+                $('#hostId').val(hostId)
+                $('#hostId').attr('disabled',true);
+                $('#judge').val(1)
+                 //location.reload();//刷新当前页
+                                   },
+            error: function(){
+                 alert("false");
+                              }
+        });
+    }
+
+
+    //-----------------------------------------------
+})
+
+</script>
 </head>
 <body>
 <form id="additemgroups" name="additemgroups" method="post" action="">
   {% csrf_token %}
   <p>Itemgroups name:
-  <input name="itemgroupsName" type="text" />
+  <input name="itemgroupsName" id="itemgroupsName" type="text" />
+  <textarea name="itemgroupsId" id="itemgroupsId" style="display: none;"></textarea>
+  <textarea name="judge" id="judge" style="display: none;"></textarea>
   </p>
   <p>Host:
     <label>
-        <select name="hostId">
+        <select name="hostId" id="hostId">
             {% for host in host %}
             <option value="{{ host.hostId }}" >{{ host.hostName }}</option>
             {% endfor %}
@@ -22,7 +79,7 @@
     </label>
   </p>
   <p>
-    <input type="submit" name="Submit" value="ADD" />
+    <input type="submit" name="Submit" value="Submit" onclick="window.close()" />
   </p>
   <p>
       Added：{{ itemgroups_data }}

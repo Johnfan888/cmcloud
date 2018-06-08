@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <script src="http://img.jb51.net/jslib/jquery/jquery.js" type="text/javascript"></script>
+    {% load staticfiles %}
+<script src="{% static 'js/jquery.js' %}"  type="text/javascript"></script>
+{#    <script src="http://img.jb51.net/jslib/jquery/jquery.js" type="text/javascript"></script>#}
 
 <script>//添加
 /* 获取url中的参数*/
@@ -37,8 +39,8 @@ $(function fun() {//$调用外部js？？
                 $trTemp.append("<td id=" + trigger[i].pk + ">" + trigger[i].fields.triggerName + "</td>");
                 //-------------------------------------------------------------------
                 //下面为每行末尾添加删除更新按钮
-                $trTemp.append("<td><input  id=\"\" type=\"submit\" name=\"Submit\" value=\"Update\"/ ></td>");
-                $trTemp.append("<td><input id=\"delete\" type=\"button\" name=\"delete\" value=\"Delete\"/ onclick=\"dd('other',this)\"></td>");
+                $trTemp.append("<td><input  id=\"update\" type=\"button\" name=\"upate\" value=\"Update\" onclick=\"update('other',this)\"></td>");
+                $trTemp.append("<td><input id=\"delete\" type=\"button\" name=\"delete\" value=\"Delete\" onclick=\"dd('other',this)\"></td>");
                 //-------------------------------------------------------------------------------------------
                 $trTemp.appendTo("#other");//trtemp加入到表格
 
@@ -71,7 +73,7 @@ function dd(tableID,obj) {
         $.ajax({
             type:"get",
             data: {'triggerId':triggerId},
-            url: "http://127.0.0.1:8000/main/view_triggers/", //后台处理函数的url 这里用的是static url 需要与urls.py中的name一致,或者直接写http地址
+            url: "http://{{ myhostip }}:8000/main/view_triggers/", //后台处理函数的url 这里用的是static url 需要与urls.py中的name一致,或者直接写http地址
             cache: false,
             dataType: "json",
             success: function(){
@@ -100,6 +102,25 @@ function dd(tableID,obj) {
      }
 
 }
+</script>
+<script>//update
+function update(tableID,obj) {
+    var rowIndex = obj.parentElement.parentElement.rowIndex;//获取点击按钮的这一行
+    var triggersId =  $('table tr:eq('+rowIndex+') td:eq(1)').attr("id");//获取要删除这一行的第二列内容id
+    //alert(itemgroupsId)
+               var url="http://{{ myhostip }}:8000/main/add_triggers/?id="+triggersId+"";                             //转向网页的地址;
+               var name='';                            //网页名称，可为空;
+               var iWidth=800;                          //弹出窗口的宽度;
+               var iHeight=500;                         //弹出窗口的高度;
+               //获得窗口的垂直位置
+               var iTop = (window.screen.availHeight - 30 - iHeight) / 2;
+               //获得窗口的水平位置
+               var iLeft = (window.screen.availWidth - 10 - iWidth) / 2;
+               //弹出窗口，并居中
+               window.open(url, name, 'height=' + iHeight + ',,innerHeight=' + iHeight + ',width=' + iWidth + ',innerWidth=' + iWidth + ',top=' + iTop + ',left=' + iLeft + ',status=no,toolbar=no,menubar=no,location=no,resizable=no,scrollbars=0,titlebar=no');
+
+}
+
 </script>
     <title>Trigger</title>
 </head>

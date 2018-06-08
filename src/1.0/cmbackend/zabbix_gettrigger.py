@@ -6,15 +6,15 @@ import json
 import urllib2
 import sys
 from urllib2 import Request, urlopen, URLError, HTTPError
-from auth import zabbix_header,zabbix_pass,zabbix_url,zabbix_user,auth_code
+from auth import zabbix_header,zabbix_pass,zabbix_url,zabbix_user,auth_code,MySQLport,MySQLuser,MySQLpasswd
 import MySQLdb
 
 json_data = {
     "jsonrpc": "2.0",
     "method": "trigger.get",
     "params": {
-        # "hostids": "10084",
-        # "triggerids":14341,
+        # "hostids": "10177",
+        # "triggerids":14504,
         "output": "extend",
         "selectFunctions": "extend"
         # "output": [
@@ -64,15 +64,15 @@ if len(auth_code) != 0:
         response = json.loads(result.read())
         result.close()
         # print response
-        # 将所有的主机jiankong信息显示出来
+        # # 将所有的主机jiankong信息显示出来
         # print "Number Of Triggers: ", len(response['result'])
-        # print response
-        # 连接数据库
+        # # print response
+        # # 连接数据库
         conn = MySQLdb.connect(
             host='localhost',
-            port=3306,
-            user='root',
-            passwd='123456',
+            port=MySQLport,
+            user=MySQLuser,
+            passwd=MySQLpasswd,
             db='cmc',
             charset='utf8',
         )
@@ -83,17 +83,24 @@ if len(auth_code) != 0:
         conn.commit()
         for trigger in response['result']:
             for item in trigger["functions"]:
-                get_data =[trigger['triggerid'],trigger['description'], trigger['value'],trigger['priority'],item[ "itemid"]]
-                # print trigger['state']
+                condition=[item['itemid'],item['triggerid'],item['function'],trigger['expression']]
+                condition = ','.join(condition)#数据库中没有
+                # condition = str(condition)#数据库中带[]
+                # print condition
+                get_data =[trigger['triggerid'],trigger['description'], trigger['value'],trigger['priority'],item[ "itemid"],
+                            trigger['comments'],condition]
+                # print get_data
                 # 连接数据库mysql
                 cur = conn.cursor()
                 # 插入一条数据
-                sql = "insert into main_ctrigger values(%s,%s,%s,%s,%s) "
+                sql = "insert into main_ctrigger values(%s,%s,%s,%s,%s,%s,%s) "
                 try:
                     cur.execute(sql, get_data)  # 执行sql语句
                     conn.commit()
-                    print "insert success!"
+                    # print "insert success!"
                 except:
                     print "Error: unable to fetch data"
+                    # print get_data
+
         cur.close()
         conn.close()

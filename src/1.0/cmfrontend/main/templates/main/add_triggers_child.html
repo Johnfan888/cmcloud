@@ -2,7 +2,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <script src="http://img.jb51.net/jslib/jquery/jquery.js" type="text/javascript"></script>
+    {% load staticfiles %}
+<script src="{% static 'js/jquery.js' %}"  type="text/javascript"></script>
+{#    <script src="http://img.jb51.net/jslib/jquery/jquery.js" type="text/javascript"></script>#}
     <title>Condition</title>
 {#    传值#}
 <script type="text/javascript">
@@ -28,7 +30,7 @@
             var checkValue=$("#one").val();//获取one的val
             var select = document.getElementById("item");
             var select_content=""//动态拼接select的内容
-            for(var i = 0; i < jsonobj.length; i++){
+            for(var i = 0; i< jsonobj.length; i++){
                 if (jsonobj[i].fields.hostId == checkValue) {
                     select_content += " <option value=" + jsonobj[i].fields.itemKey + ">" + jsonobj[i].fields.itemName + "</option>";
                 }

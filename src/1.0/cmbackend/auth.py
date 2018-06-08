@@ -4,17 +4,29 @@
 import json
 import urllib2
 import sys
+import MySQLdb
 from urllib2 import Request,urlopen,URLError,HTTPError
 #url and url header
 #zabbix的API地址、用户名、密码、这里修改为实际的参数
+# sys.path.append('/usr/CMC/')
+# from conf import MySQLport,MySQLuser,MySQLpasswd
+import ConfigParser
+cf=ConfigParser.ConfigParser()
+cf.read('/usr/CMC/zabbix_api/cmc.conf')
+MySQLport=int(cf.get('db','db_port'))
+MySQLuser=cf.get('db','db_user')
+MySQLpasswd=cf.get('db','db_passwd')
+MYSQLip=cf.get('db','db_host')
+# myhostip=cf.get('server','server_ip')
+zabbix_url=str(cf.get('zbx','zbx_url'))
+zabbix_user=str(cf.get('zbx','zbx_user'))
+zabbix_pass=str(cf.get('zbx','zbx_pass'))
+zabbix_header1=cf.get('zbx','zbx_header')
+zabbix_header=eval(zabbix_header1)
+auth_code=''
 
-zabbix_url="http://192.168.1.89/zabbix/api_jsonrpc.php"
-zabbix_header = {"Content-Type":"application/json"}
-zabbix_user = "Admin"
-zabbix_pass = "zabbix"
-auth_code = ""
 
-#auth user and password
+
 #用户认证信息的部分，最终的目的是得到一个SESSIONID
 #下面是生成一个JSON格式的数据：用户名和密码
 auth_data = json.dumps(
@@ -28,9 +40,11 @@ auth_data = json.dumps(
                                 },
                 "id":0
         })
-
+# print zabbix_url
+# print type(zabbix_url)
 # create request object
 request0 = urllib2.Request(zabbix_url,auth_data)
+
 for key in zabbix_header:
         request0.add_header(key,zabbix_header[key])
 
@@ -58,7 +72,7 @@ error result:
          'message':'Invalid params.'
         }
 '''
-#判断SESSIONID是否在返回的数据中
+# 判断SESSIONID是否在返回的数据中
 if 'result' in response0:
         auth_code = response0['result']
 else:

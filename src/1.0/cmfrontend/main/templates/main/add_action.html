@@ -1,18 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <html lang="en">
 <head>
-    {% load staticfiles %}
+{% load staticfiles %}
 {#    必须导入外部js#}
-    <link rel="stylesheet" type="text/css" href= "{% static 'css/add_action_style.css' %}" />
-    <script src="http://img.jb51.net/jslib/jquery/jquery.js" type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href= "{% static 'css/add_action_style.css' %}" />
+<style>
+#text1{
+
+width: 485px;
+height: 500px;
+max-width: 485px;
+max-height: 500px;
+        }
+.manc,.masc{
+    border: 2px dotted burlywood;
+}
+</style>
+{% load staticfiles %}
+<script src="{% static 'js/jquery.js' %}"  type="text/javascript"></script>
+{#<script src="http://img.jb51.net/jslib/jquery/jquery.js" type="text/javascript"></script>#}
 {#host和item的匹配   #}
 <script>
 {#从数据库取值需要加上safe不然乱码报错invalid property id#}
        var List={{ data1 | safe }} ;//把这个js提出去这里就会报错，不能从后台获取data1
        var jsonobj = JSON.parse(List);//解析JSON字符串
         $(document).ready(function(){
-        $("#one").change(function() {
-            var checkValue=$("#one").val();//获取one的val
+        $("#hostId").change(function() {
+            var checkValue=$("#hostId").val();//获取one的val
             var select = document.getElementById("item");
             var select_content=""//动态拼接select的内容
             for(var i = 0; i < jsonobj.length; i++){
@@ -47,41 +61,36 @@
         })
 
 </script>
-{#    action步骤添加#}
-    <style>
-        .manc,.masc{
-    border: 2px dotted burlywood;
-}
-    </style>
-<script>//动态添加操作
-var collegediv =1;
-var collegename=1;
+{#动态添加操作#}
+<script>
+var cdiv =1;
+var cname=1;
 function aa() {
      var o=document.getElementById("man");
      var div=document.createElement("div");
-     div.id = "man"+ collegediv;
+     div.id = "man"+ cdiv;
      div.className="manc"
-     var deletediv=document.createElement("div");
-     var deletename=o.childNodes.item(0).id+collegename;
+     //var deletediv=document.createElement("div");
+     var deletename=o.childNodes.item(0).id+cname;
      div.innerHTML=o.innerHTML;
      document.getElementById("div2").appendChild(div);
      div.childNodes.item(0).id=deletename;
-     collegediv++;
-     collegename++;
+     cdiv++;
+     cname++;
 
 }
 function bb() {
      var o=document.getElementById("mas");
      var div=document.createElement("div");
-     div.id = "mas"+ collegediv;
+     div.id = "mas"+ cdiv;
      div.className="masc";
-     var deletediv=document.createElement("div");
-     var deletename=o.childNodes.item(0).id+collegename;
+     //var deletediv=document.createElement("div");
+     var deletename=o.childNodes.item(0).id+cname;
      div.innerHTML=o.innerHTML;
      document.getElementById("div2").appendChild(div);
      div.childNodes.item(0).id=deletename;
-     collegediv++;
-     collegename++;
+     cdiv++;
+     cname++;
 }
 function cc(obj)
 {
@@ -104,11 +113,12 @@ function cc(obj)
 
 
 </script>
+{# 在线编辑新脚本   #}
 <script type="text/javascript">//打开新窗体
         var child; //通过判断子窗体的引用是否为空，可以控制它只能打开一个子窗体
         function opendialog() {
             if (!child) {
-                var url='http://127.0.0.1:8000/main/add_action_child/';                             //转向网页的地址;
+                var url='http://{{ myhostip }}:8000/main/add_action_child/';                             //转向网页的地址;
                var name='';                            //网页名称，可为空;
                var iWidth=1000;                          //弹出窗口的宽度;
                var iHeight=600;                         //弹出窗口的高度;
@@ -125,20 +135,210 @@ function cc(obj)
             }
         }
 </script>
-    <meta charset="UTF-8">
+{#  上传文件  #}
+<script>//input在火狐中不能修改文字，只能用按钮去链接了
+function filebutton(b) {
+    var b1=b.parentElement;//获取到当前divid的上一层的div
+    var b2=b1.id;
+    //alert(b2)
+    $("#"+b2+" input[name='upload_script']").click();
+}
+function up(a){
+    var a1=a.parentElement;//获取到当前divid的上一层的div
+    var a2=a1.id;//获取到想要的动态添加的divid，从而去进行下面操作
+    //alert(a2)
+    //var o2=document.getElementById(z);
+    //alert(o2)
+    $("#"+a2+" input[name='filename']").val(a.value)//赋值
+    //给commands一个命令
+    var actionname=$("#actionName").val();
+    var step=$("#"+a2+" input[name='from1']").val();
+    e='python /etc/zabbix/script/'+actionname+step+'.py'
+    $("#"+a2+" input[name='Commands1']").val(e)//赋值
+    //$("#"+a2+" input[name='Commands1']").attr('disabled',true);//设置其不可写入//错误后台接收不到数据
+    $("#"+a2+" input[name='Commands1']").attr('readonly',true);
+    e2=actionname+step
+    $("#"+a2+" textarea[name='sname']").val(e2)//action的步骤名
+    /*-----------------------下面为应用模板-------------------------------------*/
+    var hostip="{{ myhostip }}"//后台传来的字符串会丢失“”，需添加
+    //alert(hostip)
+    //var obj =$("#"+a2+" textarea[name='text1']").val();
+    //alert(obj)
+    if (step==1){
+            var txt1=$("#first").html();
+            //alert(txt2)
+            //var str1 = txt1.replace('A', 'B');//只修改第一个
+            a=actionname+step
+            var str1 = txt1.replace(/A/g,a);//修改全文
+            var str1 = str1.replace(/E/g,hostip);//修改模板脚本ip，为主机ip
+           $("#"+a2+" textarea[name='text1']").html(str1);
+
+                  }
+
+    else {
+            //actionstepname = actionstepname.substr(0, actionstepname.length - 1);//获取action的name
+            var txt1=$("#more").html();//获取more的内容
+            a=actionname+step;
+            //alert(a)
+            var str1 = txt1.replace(/A/g, a);//修改全文
+            var str1 = str1.replace(/B/g, step);
+            c=step-1;
+            var str1 = str1.replace(/C/g, c);
+            var str1 = str1.replace(/D/g, actionname);
+            var str1 = str1.replace(/E/g,hostip);//修改模板脚本ip，为主机ip
+            //obj.value = str1;//替换，和34行的innerhtml一样功能//不一样！value传递过去的会有特殊字符的转译，不好
+            $("#"+a2+" textarea[name='text1']").html(str1);
+            //$("#"+a2+" textarea[name='text1']").innerHTML=str1;
+
+
+    }
+
+}
+
+</script>
+{#  获取ip  #}
+<script>
+    function getip(d){
+        var b1=d.parentElement;//获取到当前divid的上上一层的div
+        var b2=b1.id;
+        //alert(b2)
+        var aa=$("#"+b2+" select[name='OpcommandhostId1'] option:checked").attr('id')
+        $("#"+b2+" input[name='hostip']").val(aa)//赋值
+        //alert(aa)
+
+
+
+    }
+
+{#$(function(){#}
+{#$("select").change(function() {#}
+{#alert($(this).find("option:checked").attr("id"));#}
+{#        });#}
+{#    })#}
+</script>
+{#  更新  #}
+<script>
+ $(function update() {
+    urlinfo = window.location.href; //获取当前页面的url
+    len = urlinfo.length;//获取url的长度
+    offset = urlinfo.indexOf("?");//设置参数字符串开始的位置
+    newsidinfo = urlinfo.substr(offset, len)//取出参数字符串 这里会获得类似“id=1”这样的字符串
+    newsids = newsidinfo.split("=");//对获得的参数字符串按照“=”进行分割
+    updateactionId = newsids[1];//得到第一个参数值hostid
+    //alert(updatehostgroupsId)
+     $('#actionId').val(updateactionId)
+     //给后台一个判断添加还是更新的条件
+     var judge=$('#actionName').val()
+     if(judge.length == 0 ){
+         $('#judge').val(0)
+     }
+    //-------------------ajax EGT------------------------
+    if (updateactionId != undefined){//当界面是查看中跳转过来时执行
+        $.ajax({
+            type:"get",
+            data: {'updateactionId':updateactionId},
+            url: "http://{{ myhostip }}:8000/main/add_action/", //后台处理函数的url 这里用的是static url 需要与urls.py中的name一致,或者直接写http地址
+            cache: false,
+            dataType: "json",
+            success: function(data){
+                //返回给前端的值
+                 alert("已成功！")
+                //alert(data[0])
+                //data不是一个字符串是一对象,需要转换
+                action=JSON.stringify(data[0])//取数组的第一个字符串，相当于去掉[]
+
+                {#alert(action)#}
+                var action2 = JSON.parse(action)//解析
+                var actionName=action2['actionName']
+                var actionStepPeriod=action2['actionStepPeriod']
+                var triggerId=action2['triggerId']
+                var actionCommand=action2['actionCommand']
+                {#var actionStepPeriod=action2['actionStepPeriod']#}
+                //alert(actionStepPeriod)
+                //alert(hostgroupsName)
+                $('#actionName').val(actionName)
+                $('#actionName').attr('disabled',true);
+                $('#osc').val(actionStepPeriod)
+                $('#osc').attr('disabled',true);
+                //-----------------------------
+                $('#trigger').val(triggerId)
+                $('#trigger').attr('disabled',true);
+                var List={{ data3 | safe }} ;//把这个js提出去这里就会报错，不能从后台获取data1
+                var jsonobj = JSON.parse(List);//解析JSON字符串
+                {#alert(jsonobj)#}
+                for(var i = 0; i < jsonobj.length; i++) {
+                    {#alert(jsonobj[i].fields.triggerId)#}
+                    if (jsonobj[i].pk == triggerId) {
+                           itemid=jsonobj[i].fields.itemId
+                           $('#item').val(itemid)
+                           $('#item').attr('disabled',true);
+
+                        }
+                    }
+
+
+                var List={{ data1 | safe }} ;//把这个js提出去这里就会报错，不能从后台获取data1
+                var itemobj = JSON.parse(List);//解析JSON字符串
+                {#alert(jsonobj)#}
+                for(var i = 0; i < itemobj.length; i++) {
+                    {#alert(jsonobj[i].fields.triggerId)#}
+                    if (itemobj[i].pk == itemid) {
+                           hostid=itemobj[i].fields.hostId
+                           $('#hostId').val(hostid)
+                           $('#hostId').attr('disabled',true);
+
+                        }
+                    }
+                {#cc1=actionCommand.split("'")#}
+                {#var reg=/u'([^']*)/g#}
+                {#var m=actionCommand.match(/u'([^']*)/g);#}
+                {#var m=actionCommand.match(/\"(.*?)\"/g);#}
+                {#m=reg.exec(actionCommand)#}
+                {#alert(m.length)#}
+                {#alert(m[1])#}
+                {#alert(m[0])#}
+
+
+
+                {#$("#btn1").click();#}
+                {#$("#btn1").click();#}
+                {#$("#btn2").click();#}
+
+
+
+
+                //-------------------------------
+                $('#judge').val(1)
+                 //location.reload();//刷新当前页
+                                   },
+            error: function(){
+                 alert("false");
+                              }
+        });
+    }
+
+
+    //-----------------------------------------------
+})
+
+</script>
+    <meta http-equiv="Content-Type" content="text/html" charset="utf-8">
     <title>action</title>
 </head>
 <body>
-<form id="addaction" name="addaction" method="post" action="">
+<form id="addaction" name="addaction" method="post" action="" enctype="multipart/form-data">
   {% csrf_token %}
+{#  防止跨站攻击所做的保护#}
   <p>Action name:
   <input id="actionName" name="actionName" type="text" />
+  <textarea name="actionId" id="actionId" style="display: none;"></textarea>
+  <textarea name="judge" id="judge" style="display: none;"></textarea>
   </p>
   <p>Host:
     <label>
-  <select id="one" name="hostId">
+  <select id="hostId" name="hostId">
             {% for host in host %}
-            <option value="{{ host.hostId }}" >{{ host.hostName }}</option>
+            <option value="{{ host.hostId }}" id="{{ host.hostIp }}">{{ host.hostName }}</option>
             {% endfor %}
   </select>
     </label>
@@ -146,70 +346,95 @@ function cc(obj)
   <p>items:
     <label>
         <select id="item" name="itemId">
-{#            {% for item in item %}#}
-{#            <option value="{{ item.itemId }}" >{{ item.itemName }}</option>#}
-{#            {% endfor %}#}
+            {% for item in item %}
+            <option value="{{ item.itemId }}" >{{ item.itemName }}</option>
+            {% endfor %}
         </select>
     </label>
   </p>
   <p>Trigger:
     <label>
         <select id="trigger" name="triggerId">
-{#            {% for trigger in trigger %}#}
-{#            <option value="{{ trigger.triggerId }}" >{{ trigger.triggerName }}</option>#}
-{#            {% endfor %}#}
+            {% for trigger in trigger %}
+            <option value="{{ trigger.triggerId }}" >{{ trigger.triggerName }}</option>
+            {% endfor %}
         </select>
     </label>
   </p>
   <p>Default Operation Step Duration:
     <label>
-        <select name="osc">
-{#            {% for host in host %}#}
-            <option value="120" >60s</option>
-            <option value="600" >120s</option>
-            <option value="1800" >1200s</option>
+        <select name="osc" id="osc">
+            {% for host in host %}
+            <option value="60" >60s</option>
+            <option value="120" >120s</option>
+            <option value="1200" >1200s</option>
             <option value="3600" >3600s</option>
-{#            {% endfor %}#}
+
+            {% endfor %}
         </select>
+{#        <input id="osc" name="osc" type="text" />#}
     </label>
   </p>
+
+<p>Operation type:
+<input type='button' id="btn1" value='Remote command' onclick="aa()"/>
+<input type='button' id="btn2" value='Send message' onclick="bb()"/>
+</p>
+<div id='div2'></div>
+  <p>
+    <input type="submit" name="Submit" value="Submit" onclick="window.close()" />
+  </p>
+  <p>
+      Added：{{ action_data }}
+  </p>
+
+</form>
+{#下面为动态添加的命令和邮件#}
 <div id='div1' style="display: none;">
 
     <div id="man" class="manc" ><input type="button" value="Delete" id="input" class="btn_list" onclick="cc(this)">
-<div id="operation1">
+
   <p>Operation type:  Remote command
   </p>
   <p>
-      step<input style="width:50px;" name="from1"/>--<input style="width:50px;" name="to1"/>(0 - infinitely)
+      step<input style="width:50px;" name="from1"/>
   </p>
   <p>
       Step Duration<input style="width:50px;" name="stepduration1"/>(minimum 60 seconds, 0 - use action default)
   </p>
-  <p>Opcommand host:
-    <label>
-        <select name="OpcommandhostId1">
+  Opcommand host:
+
+        <select name="OpcommandhostId1" id="OpcommandhostId1" onchange="getip(this)">
             {% for host in host %}
-            <option value="{{ host.hostId }}" >{{ host.hostName }}</option>
+            <option value="{{ host.hostId }}" id="{{ host.hostIp }}">{{ host.hostName }}</option>
             {% endfor %}
         </select>
-    </label>
-  </p>
+        <input id="hostip" name="hostip" style="display: none;"></input>
+
+
+
+  <p>Please select the script you want to upload:(unnecessary)</p>
+  <input type="file" name="upload_script" id="upload_script"  style="display: none;" onchange="up(this)"/>
+  <input type="filename" id="filename" name="filename" value="" style="width:100px"/>
+  <input type="button" id="file_button" name="file_button" value="choose" onclick="filebutton(this)"/>
+  <input type="button" id="open" value="Edit Script" onclick="opendialog()" />
   <p>Commands:
-      <input id="commands1" name="Commands1" type="text"/>
-      <input type="button" id="open" value="Script" onclick="opendialog()" />
+  <input id="commands1" name="Commands1" type="text" style="width:400px"/>
+  <textarea id="sname" name="sname" style="display: none;"></textarea>
+  <textarea id="text1" name="text1" rows="3" cols="20" style="display: none;"></textarea>
   </p>
-</div>
 <br />
     </div>
     </br>
 </div>
+</br>
 <div id='div3'style="display: none;">
     <div id="mas" class="masc"><input type="button" value="Delete" id="input" class="btn_list" onclick="cc(this)">
 <div id="operation2">
-  <p>Operation type:  Send massage
+  <p>Operation type:  Send message
   </p>
   <p>
-      step<input style="width:50px;" name="from2"/>--<input style="width:50px;" name="to2"/>(0 - infinitely)
+      step<input style="width:50px;" name="from2"/>
   </p>
   <p>
       Step duration<input style="width:50px;" name="stepduration2"/>(minimum 60 seconds, 0 - use action default)
@@ -224,18 +449,42 @@ function cc(obj)
     </div>
     </br>
 </div>
-<p>Operation type:
-<input type='button' id="btn1" value='Remote command' onclick="aa()"/>
-<input type='button' id="btn2" value='Send massage' onclick="bb()"/>
-</p>
-<div id='div2'></div>
-  <p>
-    <input type="submit" name="Submit" value="ADD" />
-  </p>
-  <p>
-      Added：{{ action_data }}
-  </p>
 
-</form>
+
+{#模板#}
+<div id="first" name="first"  style="display: none;">#name: A.py
+#url: /etc/zabbix/script/
+import commands
+import yaml
+import os
+output= commands.getoutput('sh /etc/zabbix/script/A.sh')
+fr = open('/etc/zabbix/script/return.yaml',"a+")
+data ={'A':{'step':'1','value':output}}
+print data
+yaml.dump(data,fr)
+fr.close()
+os.system("nc E 8899 < /etc/zabbix/script/return.yaml")
+</div>
+<div id="more" name="more" style="display: none">#name: A.py
+#url: /etc/zabbix/script/
+import yaml
+import commands
+import os
+fr = open('/etc/zabbix/script/return.yaml',"r")
+aa= yaml.load(fr)
+bb=aa['DC']
+fr.close()
+cc=bb['value']
+output=commands.getoutput('sh /etc/zabbix/script/A.sh %s' %(cc))
+data={'A':{'step':'B','value':output}}
+print data
+fr1 = open('/etc/zabbix/script/return.yaml',"a+")
+yaml.dump(data,fr1)
+fr1.close()
+os.system("nc E 8899 < /etc/zabbix/script/return.yaml")
+</div>
+
+
+
 </body>
 </html>

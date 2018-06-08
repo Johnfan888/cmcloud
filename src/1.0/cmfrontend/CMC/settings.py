@@ -26,8 +26,8 @@ SECRET_KEY = 'kn1wqq!9&i^nt&&l!od%g6w5dt01at3$##@c19an(l8!b+f5ku'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [ ]
-
+# ALLOWED_HOSTS = [ ]
+ALLOWED_HOSTS=['*']
 
 # Application definition
 # 每一个应用添加
@@ -80,13 +80,16 @@ WSGI_APPLICATION = 'CMC.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
+import sys
+sys.path.append('/usr/CMC/zabbix_api')
+from auth import MySQLuser,MySQLpasswd
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'cmc',
-        'USER': 'root',
-        'PASSWORD':'123456',
+        'USER': MySQLuser,
+        'PASSWORD':MySQLpasswd,
         'HOST':'',
         'PORT':''
 
@@ -125,6 +128,7 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
 
 
 # Static files (CSS, JavaScript, Images)

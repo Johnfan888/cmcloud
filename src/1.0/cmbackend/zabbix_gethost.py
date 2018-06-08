@@ -6,13 +6,21 @@ import json
 import urllib2
 import sys
 from urllib2 import Request,urlopen,URLError,HTTPError
-from auth import zabbix_header,zabbix_pass,zabbix_url,zabbix_user,auth_code
+from auth import zabbix_header,zabbix_pass,zabbix_url,zabbix_user,auth_code,MySQLport,MySQLuser,MySQLpasswd
 import MySQLdb
 #request json
 json_data ={
         "method":"host.get",
         "params":{
                         "output":"extend",
+                        "selectGroups": "groupid",
+                        "selectParentTemplates":"templateid",
+                        "selectInterfaces": ["ip"],
+                        "filter": {
+                                "host": [
+
+                                  ]
+                }
         }
 }
 
@@ -54,13 +62,14 @@ if len(auth_code) != 0:
                 # print long
                 #显示主机名称，并循环读取将每个主机定义一个变量
                 # 连接数据库
+                #
                 conn = MySQLdb.connect(
-                        host='localhost',
-                        port=3306,
-                        user='root',
-                        passwd='123456',
-                        db='cmc',
-                        charset='utf8',
+                    host='localhost',
+                    port=MySQLport,
+                    user=MySQLuser,
+                    passwd=MySQLpasswd,
+                    db='cmc',
+                    charset='utf8',
                 )
                 cur = conn.cursor()
                 # 清空数据库
@@ -68,18 +77,22 @@ if len(auth_code) != 0:
                 cur.execute(sql1)
                 conn.commit()
                 for host in response['result']:
-                        get_data =[host['hostid'], host['name'],host['status'] ]
-                        #此处注意！！要加一个括号[]！！！
-                        # print get_data
-                        #连接数据库mysql
-                        cur = conn.cursor()
-                        #插入一条数据
-                        sql=" insert into main_chost values(%s,%s,%s) "
-                        try:
-                                cur.execute(sql,get_data)# 执行sql语句
-                                conn.commit()
-                                print "insert success!"
-                        except:
-                                print "Error: unable to fetch data"
+                        for group in host['groups']:
+                                for interfaces in host['interfaces']:
+                                        for template in host['parentTemplates']:
+                                                get_data =[host['hostid'], host['name'],host['status'],group['groupid'],template['templateid'],interfaces["ip"]]
+                                                #此处注意！！要加一个括号[]！！！
+                                                # print get_data
+                                                #连接数据库mysql
+                                                # cur = conn.cursor()
+                                                #插入一条数据
+                                                sql=" insert into main_chost values(%s,%s,%s,%s,%s,%s) "
+                                                try:
+                                                        cur.execute(sql, get_data)  # 执行sql语句
+                                                        conn.commit()
+                                                        # print "insert success!"
+                                                except:
+                                                        print "Error: unable to fetch data"
+
                 cur.close()
                 conn.close()

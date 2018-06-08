@@ -12,19 +12,18 @@ from urllib2 import Request,urlopen,URLError,HTTPError
 #zabbix的API地址、用户名、密码、这里修改为实际的参数
 from auth import zabbix_header,zabbix_pass,zabbix_url,zabbix_user,auth_code,auth_data
 
-name="text1950"
+name="text19501"
 osc=120
 trigger="14505"
-stepduration1=[60,60]
-stepduration2=[60,60]
-from1=[1,2]
-to1=[1,2]
-host=[10167,10167]
-command=[12,12]
-from2=[1,2]
-to2=[1,2]
-mediatype=[4,4]
-
+stepduration1=[260,160,160]
+stepduration2=[160,160,160]
+from1=[1,2,3]
+to1=[1,2,3]
+host=[10167,10167,10167]
+command=[12,12,33]
+from2=[1,2,3]
+to2=[1,2,3]
+mediatype=[4,4,4]
 # ---------执行命令------------
 json_command=[]
 n=len(from1)
@@ -89,54 +88,18 @@ for j in range(i):
                         }
 
     json_mail.append(json_mail1)#加入[]
-# json_mail=','.join(str(k) for k in json_mail)#将数组的[]去掉
+
 #--------------------拼接直接相加list------
 
 json_html= json_command + json_mail
-#类型list三者均是
-# print type(json_command)
-# print type(json_mail)
-# print type(json_html)
-# print json_html
-#     #request json //create host
+
 json_data ={
             "jsonrpc": "2.0",
-            "method": "action.create",
+            "method": "action.update",
             "params": {
-                "name":name,  # action名字
-                "eventsource": 0,  # 0 - event created by a trigger;
-                # 1 - event created by a discovery rule;
-                # 2 - event created by active agent auto-registration;
-                # 3 - internal event.
-                "status": 0,  # Whether the action is enabled or disabled.  0 - (default) enabled; 1 - disabled.
+                "actionid":54,
+                # "name":name,  # action名字
                 "esc_period": osc,
-                "def_shortdata": "{TRIGGER.STATUS}: {TRIGGER.NAME}",
-                "def_longdata": "{\r\n\"Trigger status\": \"{TRIGGER.STATUS}\",\r\n\"Trigger name\": \"{TRIGGER.NAME}\",\r\n\"Trigger severity\": \"{TRIGGER.SEVERITY}\",\r\n\"Action name\": \"{ACTION.NAME}\",\r\n\"Event ID\": \"{EVENT.ID}\",\r\n\"Event value\": \"{EVENT.VALUE}\",\r\n\"Event status\": \"{EVENT.STATUS}\", \r\n\"Event time\": \"{EVENT.TIME}\",\r\n\"Event date\": \"{EVENT.DATE}\",\r\n\"Event age\": \"{EVENT.AGE}\",\r\n\"Event acknowledgement\": \"{EVENT.ACK.STATUS}\",\r\n\"Event acknowledgement history\": \"{EVENT.ACK.HISTORY}\",\r\n\"Item values\": \"{ITEM.NAME1} ({HOST.NAME1}:{ITEM.KEY1}): {ITEM.VALUE1}\",\r\n\"Original event ID\": \"{EVENT.ID}}\"",
-                "r_longdata": "{\r\n\"Trigger status\": \"{TRIGGER.STATUS}\",\r\n\"Trigger name\": \"{TRIGGER.NAME}\",\r\n\"Trigger severity\": \"{TRIGGER.SEVERITY}\",\r\n\"Action name\": \"{ACTION.NAME}\",\r\n\"Event ID\": \"{EVENT.ID}\",\r\n\"Event value\": \"{EVENT.VALUE}\",\r\n\"Event status\": \"{EVENT.STATUS}\", \r\n\"Event time\": \"{EVENT.TIME}\",\r\n\"Event date\": \"{EVENT.DATE}\",\r\n\"Event age\": \"{EVENT.AGE}\",\r\n\"Event acknowledgement\": \"{EVENT.ACK.STATUS}\",\r\n\"Event acknowledgement history\": \"{EVENT.ACK.HISTORY}\",\r\n\"Item values\": \"{ITEM.NAME1} ({HOST.NAME1}:{ITEM.KEY1}): {ITEM.VALUE1}\",\r\n\"Original event ID\": \"{EVENT.ID}}\"",
-                "r_shortdata": "{TRIGGER.STATUS}: {TRIGGER.NAME}",
-                "filter": {
-                    "evaltype": 0,  # 0 - and/or; 1 - and; 2 - or; 3 - custom expression.
-                    "conditions": [
-                        {
-                            "conditiontype": 2,
-                            # Possible values for trigger actions: 0 - host group; 1 - host; 2 - trigger; 3 - trigger name;
-                            # 4 - trigger severity; 5 - trigger value; 6 - time period; 13 - host template; 15 - application; 16 - maintenance status.
-                            "operator": 0,
-                            # Possible values: 0 - (default) =; 1 - <>; 2 - like; 3 - not like; 4 - in; 5 - >=; 6 - <=; 7 - not in.
-                            "value": trigger # triggerid
-                        },
-                        # {
-                            # "conditiontype": 1,
-                            # Possible values for trigger actions: 0 - host group; 1 - host; 2 - trigger; 3 - trigger name;
-                            # 4 - trigger severity; 5 - trigger value; 6 - time period; 13 - host template; 15 - application; 16 - maintenance status.
-                            # "operator": 0,
-                            # Possible values: 0 - (default) =; 1 - <>; 2 - like; 3 - not like; 4 - in; 5 - >=; 6 - <=; 7 - not in.
-                            # "value": "10124"  # hostid
-                        # },
-                    ],
-
-
-                },
                 "operations": json_html,
                 "recovery_operations":json_html,
 

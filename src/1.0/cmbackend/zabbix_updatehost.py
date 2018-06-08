@@ -6,34 +6,52 @@ import json
 import urllib2
 import sys
 from urllib2 import Request,urlopen,URLError,HTTPError
-import MySQLdb
-from auth import zabbix_header,zabbix_pass,zabbix_url,zabbix_user,auth_code
-# from read import itemKey,itemName,hostId,valueType,dataType,interfaceId
 import  xdrlib ,sys
-#request json //create host
-json_data = {
-    "jsonrpc": "2.0",
-    "method": "item.create",
-    "params": {
-        "name": "cvcvc21",
-        "key_": "cvvvvc",
-        "hostid": "10167",
-        "interfaceid": 58,
-        "type": 0,  # 0 - Zabbix agent; 1 - SNMPv1 agent;
-        "value_type": 0,  # 0 - numeric float; 1 - character; 2 - log; 3 - numeric unsigned; 4 - text.
-        "data_type":3,  # 0 - (default) decimal; 1 - octal; 2 - hexadecimal; 3 - boolean.
-        # zai interface biaoli yilaiyu hostid
-        "applications": ["959"],#!!!此处需要[]
-        "description": "qw",
-        "units":"M",
-        "delay": 30
+from auth import zabbix_header,zabbix_pass,zabbix_url,zabbix_user,auth_code
 
-    },
-    "auth": auth_code,
-    "id": 1
-}
+# sys.path.append('/usr/CMC/main/')
+#
+# import views
+# from views import add_host
+# views.add_host( 'add_host_data' )
+
+
+#request json //create host
+
+ip="192.168.1.222"
+
+json_data = {
+        "jsonrpc": "2.0",
+        "method": "host.update",
+        "params": {
+            "hostid": "10177",
+            "host":"cdcddcd123",
+                    # "host": "hhh33",
+            # "interface":
+            # {
+            #
+            #     "ip": "192.168.1.122",
+            # }
+            #         ,
+            # "ip":ip,
+            "groups":
+                        {
+                            # "groupid": '4'
+                    "groupid": "17",
+                        },
+            "templates":
+                        {
+                            # "templateid": '10001'
+                    "templateid": "10001"
+                        },
+                },
+        "auth": auth_code,
+        "id": 1
+            }
+# print json_data
 
 #用得到的SESSIONID去验证，获取主机的信息(用http.get方法)
+
 if len(auth_code) == 0:
         sys.exit(1)
 if len(auth_code) != 0:
@@ -59,7 +77,4 @@ if len(auth_code) != 0:
                 result.close()
                 print response
 
-                #将所有的主机信息显示出来
-                # print response
-                #显示主机个数
-                # print "Number Of Hosts: ",len(response['result'])
+

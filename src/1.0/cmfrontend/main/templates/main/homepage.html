@@ -25,10 +25,10 @@ function btn(n)//每个按钮一个点击事件
     <br/>
     <div id="globllink">
         <ul>
-            <li><a href="http://127.0.0.1:8000/main/view_hostgroups/" target="view" onclick="btn(0)">Hostgroups</a> </li>
-            <li><a href="http://127.0.0.1:8000/main/view_templates/" target="view" onclick="btn(1)">Templates</a> </li>
-            <li><a href="http://127.0.0.1:8000/main/view_host/" target="view" onclick="btn(2)">hosts</a> </li>
-            <li><a href="http://127.0.0.1:8000/main/view_action/" target="view" onclick="btn(3)">actions</a> </li>
+            <li><a href="http://{{ myhostip }}:8000/main/view_hostgroups/" target="view" onclick="btn(0)">Hostgroups</a> </li>
+            <li><a href="http://{{ myhostip }}:8000/main/view_templates/" target="view" onclick="btn(1)">Templates</a> </li>
+            <li><a href="http://{{ myhostip }}:8000/main/view_host/" target="view" onclick="btn(2)">hosts</a> </li>
+            <li><a href="http://{{ myhostip }}:8000/main/view_action/" target="view" onclick="btn(3)">actions</a> </li>
 
         </ul>
     </div>

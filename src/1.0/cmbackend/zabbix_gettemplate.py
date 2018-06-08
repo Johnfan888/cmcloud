@@ -6,7 +6,7 @@ import json
 import urllib2
 import sys
 from urllib2 import Request,urlopen,URLError,HTTPError
-from auth import zabbix_header,zabbix_pass,zabbix_url,zabbix_user,auth_code
+from auth import zabbix_header,zabbix_pass,zabbix_url,zabbix_user,auth_code,MySQLport,MySQLuser,MySQLpasswd
 import MySQLdb
 #request json
 json_data ={
@@ -14,11 +14,17 @@ json_data ={
         "method": "template.get",
         "params": {
             "output": "extend",
+            "selectGroups": "extend",
             "filter": {
                 "host": [
-                    # "Template OS Linux",
+                    # "xs321ed",
                     # "Template OS Windows"
-                ]
+                ],
+
+                # "groups":[
+                #         "ttt1"
+                # ]
+
             }
         },
         "auth": auth_code,
@@ -56,11 +62,12 @@ if len(auth_code) != 0:
                 # print long
                 #显示主机名称，并循环读取将每个主机定义一个变量
                 #连接数据库
+                #
                 conn = MySQLdb.connect(
                     host='localhost',
-                    port=3306,
-                    user='root',
-                    passwd='123456',
+                    port=MySQLport,
+                    user=MySQLuser,
+                    passwd=MySQLpasswd,
                     db='cmc',
                     charset='utf8',
                 )
@@ -70,18 +77,21 @@ if len(auth_code) != 0:
                 cur.execute(sql1)
                 conn.commit()
                 for host in response['result']:
-                        get_data =[host['templateid'], host['name'] ]
-                        #此处注意！！要加一个括号[]！！！
-                        # print get_data
-                       # 连接数据库mysql
-                        cur = conn.cursor()
-                        # 插入一条数据
-                        sql2 = "insert into main_ctemplates values(%s,%s) "
-                        try:
-                            cur.execute(sql2, get_data)  # 执行sql语句
-                            conn.commit()
-                            print "insert success!"
-                        except:
-                            print "Error: unable to fetch data"
+                        for group in host['groups']:
+                                get_data =[host['templateid'], host['name'],group['groupid']]
+                                #此处注意！！要加一个括号[]！！！
+                                #print get_data
+
+                               # 连接数据库mysql
+                                #cur = conn.cursor()
+                                # 插入一条数据
+                                sql2 = "insert into main_ctemplates values(%s,%s,%s) "
+                                try:
+                                        cur.execute(sql2, get_data)  # 执行sql语句
+                                        conn.commit()
+                                        # print "insert success!"
+                                except:
+                                        print "Error: unable to fetch data"
+
                 cur.close()
                 conn.close()

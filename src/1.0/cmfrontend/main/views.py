@@ -23,14 +23,29 @@ from django.core import serializers #导入serializers模块
 import yaml
 import commands
 
+import socket
+#-------------获取hostip-----------------
+def get_host_ip():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(('8.8.8.8', 80))
+        ip = s.getsockname()[0]
+    finally:
+        s.close()
+
+    return ip
+
 #读取yaml
 #-----------------------
 # Create your views here.
 def main(request):
+    myhostip=get_host_ip()
+    # myhostip = auth.myhostip
     #os.system("nc -l -p 8899 -k > /etc/zabbix/aa/shiyan.yaml")
-    return render(request, 'main/main.html', )
+    return render(request, 'main/main.html',locals() )
 
 def homepage(request):
+    myhostip = get_host_ip()
     # os.system('python /usr/CMC/zabbix_api/zabbix_gethost.py')
     # host = models.chost.objects.all().values('hostName') #取数据库的数据
     # os.system('python /usr/CMC/zabbix_api/zabbix_getgroup.py')
@@ -41,9 +56,11 @@ def homepage(request):
     #locals()取所有本地数据
 
 def add(request):
-    return render(request, 'main/add.html', )
+    myhostip = get_host_ip()
+    return render(request, 'main/add.html', locals())
 
 def add_host(request):
+    myhostip = get_host_ip()
     os.system('python /usr/CMC/zabbix_api/zabbix_gettemplate.py')
     os.system('python /usr/CMC/zabbix_api/zabbix_getgroup.py')
     hostgroups = models.chostgroups.objects.all()
@@ -55,45 +72,73 @@ def add_host(request):
         hostIp = request.POST.get('hostIp')
         groupId = request.POST.get('hostgroupsId')
         templatesId = request.POST.get('templatesId')
-        json_data = {
-            "jsonrpc": "2.0",
-            "method": "host.create",
-            "params": {
-                "host":hostName,
-                # "host": "hhh33",
-                "interfaces": [
-                    {
-                        "type": 1,
-                        "main": 1,
-                        "useip": 1,
-                        # "ip": '192.168.1.100',
-                        "ip": hostIp,
-                        "dns": "",
-                        "port": "10050"
+        judge = request.POST.get('judge')
+        if judge == "0":
+            json_data = {
+                "jsonrpc": "2.0",
+                "method": "host.create",
+                "params": {
+                    "host":hostName,
+                    # "host": "hhh33",
+                    "interfaces": [
+                        {
+                            "type": 1,
+                            "main": 1,
+                            "useip": 1,
+                            # "ip": '192.168.1.100',
+                            "ip": hostIp,
+                            "dns": "",
+                            "port": "10050"
+                        }
+                    ],
+                    "groups": [
+                        {
+                            # "groupid": '4'
+                            "groupid": groupId,
+                        }
+                    ],
+                    "templates": [
+                        {
+                            # "templateid": '10001'
+                            "templateid": templatesId
+                        }
+                    ],
+                    "inventory_mode": 0,
+                    "inventory": {
+                        "macaddress_a": "01234",
+                        "macaddress_b": "56768"
                     }
-                ],
-                "groups": [
-                    {
-                        # "groupid": '4'
-                        "groupid": groupId,
-                    }
-                ],
-                "templates": [
-                    {
-                        # "templateid": '10001'
-                        "templateid": templatesId
-                    }
-                ],
-                "inventory_mode": 0,
-                "inventory": {
-                    "macaddress_a": "01234",
-                    "macaddress_b": "56768"
-                }
-            },
-            "auth": auth_code,
-            "id": 1
-        }
-
+                },
+                "auth": auth_code,
+                "id": 1
+            }
+        else:
+            hostId = request.POST.get('hostId')
+            json_data = {
+                "jsonrpc": "2.0",
+                "method": "host.update",
+                "params": {
+                    "hostid": hostId,
+                    "host":hostName,
+                    # "host": "hhh33",
+                    # "interfaces":
+                    #     {
+                    #         "ip": hostIp,
+                    #     },改不了ip？？
+                    "groups":
+                        {
+                            # "groupid": '4'
+                            "groupid": groupId,
+                        },
+                    "templates":
+                        {
+                            # "templateid": '10001'
+                            "templateid": templatesId,
+                        },
+                },
+                "auth": auth_code,
+                "id": 1
+            }
         # 用得到的SESSIONID去验证，获取主机的信息(用http.get方法)
 
         if len(auth_code) == 0:
@@ -125,22 +170,45 @@ def add_host(request):
                 add_host_data = {'hostName': hostName, 'hostIp': hostIp, 'groupId': groupId, 'templatesId': templatesId}
 
                 return render(request, 'main/add_host.html',locals())
+    if 'updatehostId' in request.GET:#必须有if
+        updatehostId = request.GET['updatehostId']
+        os.system('python /usr/CMC/zabbix_api/zabbix_gethost.py')
+        host = models.chost.objects.values().filter(hostId=updatehostId) # 取数据库的数据,取出的是ValuesQuerySet对象
+        host=list(host)#先转化为list，然后转化为json
+
+        return HttpResponse(json.dumps(host), content_type='application/json')
     return render(request,'main/add_host.html',locals())
 
 def add_hostgroups(request):
+    myhostip = get_host_ip()
     # 点提交进行的步骤
-    if request.method == "POST":
-        hostgroupsName = request.POST.get('hostgroupsName')
-        json_data = {
-            "jsonrpc": "2.0",
-            "method": "hostgroup.create",
-            "params": {
-                "name": hostgroupsName,
-            },
-            "auth": auth_code,
-            "id": 1
-        }
 
+    if request.method == "POST":
+        judge = request.POST.get('judge')
+        hostgroupsName = request.POST.get('hostgroupsName')
+
+        if judge == "0":
+            json_data = {
+                "jsonrpc": "2.0",
+                "method": "hostgroup.create",
+                "params": {
+                    "name": hostgroupsName,
+                },
+                "auth": auth_code,
+                "id": 1
+            }
+        else:
+            hostgroupsId = request.POST.get('hostgroupsId')
+            json_data = {
+                "jsonrpc": "2.0",
+                "method": "hostgroup.update",
+                "params": {
+                    "groupid": hostgroupsId,
+                    "name": hostgroupsName,
+                },
+                "auth": auth_code,
+                "id": 1
+            }
         # 用得到的SESSIONID去验证，获取主机的信息(用http.get方法)
 
         if len(auth_code) == 0:
@@ -169,38 +237,74 @@ def add_hostgroups(request):
                 # print response
                 aa = {'b': hostgroupsName}
                 return render(request, 'main/add_hostgroups.html', aa)
+    #-----------------------update-----------------------
+
+    if 'updatehostgroupsId' in request.GET:#必须有if
+        updatehostgroupsId = request.GET['updatehostgroupsId']
+        os.system('python /usr/CMC/zabbix_api/zabbix_getgroup.py')
+        host = models.chostgroups.objects.values().filter(hostgroupsId=updatehostgroupsId) # 取数据库的数据,取出的是ValuesQuerySet对象
+        host=list(host)#先转化为list，然后转化为json
+
+        return HttpResponse(json.dumps(host), content_type='application/json')
     return render(request, 'main/add_hostgroups.html')
 
 def add_templates(request):
+    myhostip = get_host_ip()
     os.system('python /usr/CMC/zabbix_api/zabbix_getgroup.py')
     hostgroups = models.chostgroups.objects.all()
     if request.method == "POST":
-        hostgroups = models.chostgroups.objects.all()
+        #hostgroups = models.chostgroups.objects.all()
         templateName = request.POST.get('templateName')
         hostgroupsId = request.POST.get('hostgroupsId')
-
-        json_data = {
-            "jsonrpc": "2.0",
-            "method": "template.create",
-            "params": {
-                "host": templateName,
-                "groups": {
-                    "groupid": hostgroupsId,
+        judge = request.POST.get('judge')
+        if judge == "0":
+            json_data = {
+                "jsonrpc": "2.0",
+                "method": "template.create",
+                "params": {
+                    "host": templateName,
+                    "groups": {
+                        "groupid": hostgroupsId,
+                    },
+                    # "hosts": [
+                    #     {
+                    #         "hostid": "10084"
+                    #     },
+                    #     {
+                    #         "hostid": "10090"
+                    #     }
+                    # ]
                 },
-                # "hosts": [
-                #     {
-                #         "hostid": "10084"
-                #     },
-                #     {
-                #         "hostid": "10090"
-                #     }
-                # ]
-            },
-            "auth": auth_code,
-            "id": 1
-        }
+                "auth": auth_code,
+                "id": 1
+            }
         # 用得到的SESSIONID去验证，获取主机的信息(用http.get方法)
-
+        else:
+            templateId = request.POST.get('templateId')
+            json_data = {
+                "jsonrpc": "2.0",
+                "method": "template.update",
+                "params": {
+                    "templateid":templateId,
+                    "host": templateName,
+                    "groups": {
+                         "groupid": hostgroupsId,
+                    },
+                    # "groups": {
+                    #     "groupid": hostgroupsId,
+                    # },
+                    # "hosts": [
+                    #     {
+                    #         "hostid": "10084"
+                    #     },
+                    #     {
+                    #         "hostid": "10090"
+                    #     }
+                    # ]
+                },
+                "auth": auth_code,
+                "id": 1
+            }
         if len(auth_code) == 0:
             sys.exit(1)
         if len(auth_code) != 0:
@@ -229,29 +333,49 @@ def add_templates(request):
 
                 return render(request,'main/add_templates.html',locals())
 
+    if 'updatetemplateId' in request.GET:#必须有if
+        updatetemplateId = request.GET['updatetemplateId']
+        os.system('python /usr/CMC/zabbix_api/zabbix_gettemplate.py')
+        templates = models.ctemplates.objects.values().filter(templatesId=updatetemplateId) # 取数据库的数据,取出的是ValuesQuerySet对象
+        templates=list(templates)#先转化为list，然后转化为json
 
+        return HttpResponse(json.dumps(templates), content_type='application/json')
 
     return render(request, 'main/add_templates.html',locals())
 
 def add_itemgroups(request):
+    myhostip = get_host_ip()
     os.system('python /usr/CMC/zabbix_api/zabbix_gethost.py')
     host = models.chost.objects.all()
     if request.method == "POST":
         host = models.chost.objects.all()
         itemgroupsName = request.POST.get('itemgroupsName')
         hostId = request.POST.get('hostId')
-        json_data = {
-            "jsonrpc": "2.0",
-            "method": "application.create",
-            "params": {
-                "name": itemgroupsName,
-                "hostid": hostId,
-            },
-            "auth": auth_code,
-            "id": 1
-        }
+        judge = request.POST.get('judge')
+        if judge == "0":
+            json_data = {
+                "jsonrpc": "2.0",
+                "method": "application.create",
+                "params": {
+                    "name": itemgroupsName,
+                    "hostid": hostId,
+                },
+                "auth": auth_code,
+                "id": 1
+            }
         # 用得到的SESSIONID去验证，获取主机的信息(用http.get方法)
-
+        else:
+            itemgroupsId = request.POST.get('itemgroupsId')
+            json_data = {
+                "jsonrpc": "2.0",
+                "method": "application.update",
+                "params": {
+                    "applicationid": itemgroupsId,
+                    "name": itemgroupsName,
+                },
+                "auth": auth_code,
+                "id": 1
+            }
         if len(auth_code) == 0:
             sys.exit(1)
         if len(auth_code) != 0:
@@ -279,13 +403,23 @@ def add_itemgroups(request):
                 itemgroups_data = {'itemgroupsName': itemgroupsName, 'hostId': hostId}
 
                 return render(request, 'main/add_itemgroups.html', locals())
+    if 'updateitemgroupsId' in request.GET:#必须有if
+        updateitemgroupsId= request.GET['updateitemgroupsId']
+        os.system('python /usr/CMC/zabbix_api/zabbix_getitemgroup.py')
+        itemgroups = models.citemgroups.objects.values().filter(itemgroupsId=updateitemgroupsId) # 取数据库的数据,取出的是ValuesQuerySet对象
+        itemgroups=list(itemgroups)#先转化为list，然后转化为json
+
+        return HttpResponse(json.dumps(itemgroups), content_type='application/json')
     return render(request, 'main/add_itemgroups.html',locals())
 
 def add_items(request):
+    myhostip = get_host_ip()
     os.system('python /usr/CMC/zabbix_api/zabbix_gethost.py')
     os.system('python /usr/CMC/zabbix_api/zabbix_getinterface.py')
     os.system('python /usr/CMC/zabbix_api/zabbix_getitemgroup.py')
     interface = models.cinterface.objects.all()
+    interfacedata = serializers.serialize("json", interface)
+    interfacedata = json.dumps(interfacedata)
     host = models.chost.objects.all()
     itemgroup = models.citemgroups.objects.all()
     # itemgroup = models.citemgroups.objects.all().values('itemgroupsName', 'itemgroupsId', 'hostId')
@@ -303,29 +437,57 @@ def add_items(request):
         description = request.POST.get('description')
         valuetype = request.POST.get('valuetype')
         datatype = request.POST.get('datatype')
+        unit=request.POST.get('unit')
         #------------------
-        json_data = {
-            "jsonrpc": "2.0",
-            "method": "item.create",
-            "params": {
-                "name": itemName,
-                "key_": itemKey,
-                "hostid": hostId,
-                "interfaceid": interfaceId,
-                "type": 0,  # 0 - Zabbix agent; 1 - SNMPv1 agent;
-                "value_type": valuetype,  # 0 - numeric float; 1 - character; 2 - log; 3 - numeric unsigned; 4 - text.
-                "data_type": datatype,  # 0 - (default) decimal; 1 - octal; 2 - hexadecimal; 3 - boolean.
-                # zai interface biaoli yilaiyu hostid
-                "applications": itemgroups,
-                "description": description,
-                "delay": 30
+        judge = request.POST.get('judge')
+        if judge == "0":
+            json_data = {
+                "jsonrpc": "2.0",
+                "method": "item.create",
+                "params": {
+                    "name": itemName,
+                    "key_": itemKey,
+                    "hostid": hostId,
+                    "interfaceid": interfaceId,
+                    "type": 0,  # 0 - Zabbix agent; 1 - SNMPv1 agent;
+                    "value_type": valuetype,  # 0 - numeric float; 1 - character; 2 - log; 3 - numeric unsigned; 4 - text.
+                    "data_type": datatype,  # 0 - (default) decimal; 1 - octal; 2 - hexadecimal; 3 - boolean.
+                    # zai interface biaoli yilaiyu hostid
+                    "applications": [itemgroups],
+                    "description": description,
+                    "units":unit,
+                    "delay": 30
 
-            },
-            "auth": auth_code,
-            "id": 1
-        }
+                },
+                "auth": auth_code,
+                "id": 1
+            }
         # 用得到的SESSIONID去验证，获取主机的信息(用http.get方法)
+        else:
+            itemId=request.POST.get('itemId')
+            json_data = {
+                "jsonrpc": "2.0",
+                "method": "item.update",
+                "params": {
+                    "itemid": itemId,
+                    "name": itemName,
+                    "key_": itemKey,
+                    "hostid": hostId,
+                    "interfaceid": interfaceId,
+                    "type": 0,  # 0 - Zabbix agent; 1 - SNMPv1 agent;
+                    "value_type": valuetype,
+                # 0 - numeric float; 1 - character; 2 - log; 3 - numeric unsigned; 4 - text.
+                    "data_type": datatype,  # 0 - (default) decimal; 1 - octal; 2 - hexadecimal; 3 - boolean.
+                    # zai interface biaoli yilaiyu hostid
+                    "applications": itemgroups,
+                    "description": description,
+                    "units": unit,
+                    "delay": 30
 
+                },
+                "auth": auth_code,
+                "id": 1
+            }
         if len(auth_code) == 0:
             sys.exit(1)
         if len(auth_code) != 0:
@@ -355,29 +517,53 @@ def add_items(request):
                     'interfaceId':interfaceId, 'itemgroups':itemgroups, 'description':description,
                     'valuetype':valuetype, 'datatype':datatype}
                 return render(request,'main/add_items.html',locals() )
+    if 'updateitemId' in request.GET:#必须有if
+        updateitemId= request.GET['updateitemId']
+        os.system('python /usr/CMC/zabbix_api/zabbix_getitem.py')
+        item = models.citem.objects.values().filter(itemId=updateitemId) # 取数据库的数据,取出的是ValuesQuerySet对象
+        item=list(item)#先转化为list，然后转化为json
+
+        return HttpResponse(json.dumps(item), content_type='application/json')
     return render(request, 'main/add_items.html',locals())
 
 def add_triggers(request):
+    myhostip = get_host_ip()
     if request.method == "POST":
         triggersname = request.POST.get('triggersname')
         condition = request.POST.get('condition')
         description = request.POST.get('description')
         severity = request.POST.get('severity')
         # request json //create host
-        json_data = {
-            "jsonrpc": "2.0",
-            "method": "trigger.create",
-            "params": {
-                "description": triggersname,
-                "expression": condition,
-                "comments": description,
-                "priority": severity
-            },
-            "auth": auth_code,
-            "id": 1
-        }
+        judge = request.POST.get('judge')
+        if judge == "0":
+            json_data = {
+                "jsonrpc": "2.0",
+                "method": "trigger.create",
+                "params": {
+                    "description": triggersname,
+                    "expression": condition,
+                    "comments": description,
+                    "priority": severity
+                },
+                "auth": auth_code,
+                "id": 1
+            }
         # 用得到的SESSIONID去验证，获取主机的信息(用http.get方法)
-
+        else:
+            triggersId = request.POST.get('triggersId')
+            json_data = {
+                "jsonrpc": "2.0",
+                "method": "trigger.update",
+                "params": {
+                    "triggerid": triggersId,
+                    "description": triggersname,
+                    "expression": condition,
+                    "comments": description,
+                    "priority": severity
+                },
+                "auth": auth_code,
+                "id": 1
+            }
         if len(auth_code) == 0:
             sys.exit(1)
         if len(auth_code) != 0:
@@ -406,10 +592,31 @@ def add_triggers(request):
                                 'severity':severity}
 
                 return render(request, 'main/add_triggers.html', locals())
+    if 'updatetriggersId' in request.GET:#必须有if
+        updatetriggersId= request.GET['updatetriggersId']
+        os.system('python /usr/CMC/zabbix_api/zabbix_gettrigger.py')
+        trigger = models.ctrigger.objects.values().filter(triggerId=updatetriggersId) # 取数据库的数据,取出的是ValuesQuerySet对象
+        trigger=list(trigger)#先转化为list，然后转化为json
+
+        return HttpResponse(json.dumps(trigger), content_type='application/json')
 
     return render(request, 'main/add_triggers.html',locals())
 
+def add_triggers_child(request):
+    myhostip = get_host_ip()
+    os.system('python /usr/CMC/zabbix_api/zabbix_gethost.py')
+    host = models.chost.objects.all()
+    os.system('python /usr/CMC/zabbix_api/zabbix_getitem.py')
+    item = models.citem.objects.all()
+    #下面两步将数据库获得的queryset格式转换为json格式
+    data = serializers.serialize("json", item)
+    data1 = json.dumps(data)
+    return render(request,'main/add_triggers_child.html',locals())
+
 def add_action(request):
+    myhostip = get_host_ip()
+    # from auth import myhostip
+    # myhostip=myhostip
     os.system('python /usr/CMC/zabbix_api/zabbix_gethost.py')
     host = models.chost.objects.all()
     os.system('python /usr/CMC/zabbix_api/zabbix_getitem.py')
@@ -430,24 +637,25 @@ def add_action(request):
         triggerId =request.POST.get('triggerId')
         # ---------------------------------------------取list-----------------------------
         from1 = request.POST.getlist('from1')
-        from1=from1[1:]#--因为前段有一个空值需要去除第一个
-        to1 = request.POST.getlist('to1')
-        to1 = to1[1:]
+        #from1=from1[0:]#--因为前段有一个空值需要去除第一个
+        # to1 = request.POST.getlist('to1')
+        # to1 = to1[0:]
         OpcommandhostId1 = request.POST.getlist('OpcommandhostId1')
-        OpcommandhostId1 = OpcommandhostId1[1:]
+        hostip=request.POST.getlist('hostip')
+        #OpcommandhostId1 = OpcommandhostId1[0:]
         commands1 = request.POST.getlist('Commands1')
-        commands1 = commands1[1:]
+        # commands1 = commands1[0:]
         stepduration1 = request.POST.getlist('stepduration1')
-        stepduration1 = stepduration1[1:]
+        # stepduration1 = stepduration1[0:]
         #-----------------------------上为命令下为邮件-------------------------------------
         stepduration2= request.POST.getlist('stepduration2')
-        stepduration2=stepduration2[1:]
+        # stepduration2=stepduration2[0:]
         from2 = request.POST.getlist('from2')
-        from2 = from2[1:]
-        to2 = request.POST.getlist('to2')
-        to2 = to2[1:]
+        # from2 = from2[0:]
+        # to2 = request.POST.getlist('to2')
+        # to2 = to2[0:]
         mediatype2 = request.POST.getlist('mediatype2')
-        mediatype2 = mediatype2[1:]
+        # mediatype2 = mediatype2[0:]
         # ----------------------------对list进行填充进json-----------------------------
         # ---------执行命令------------
         json_command = []
@@ -462,7 +670,7 @@ def add_action(request):
 
                 # Default: 0.
                 "esc_step_from": from1[m],
-                "esc_step_to": to1[m],
+                "esc_step_to": from1[m],
                 "evaltype": 0,
                 "opconditions": [
                     {
@@ -499,7 +707,7 @@ def add_action(request):
                 "operationtype": 0,
                 "esc_period": stepduration2[j],
                 "esc_step_from": from2[j],
-                "esc_step_to": to2[j],
+                "esc_step_to": from2[j],
                 "evaltype": 0,
                 "opmessage_grp": [
                     {
@@ -523,70 +731,84 @@ def add_action(request):
         # print type(json_html)
         # print json_html
         #     #request json //create host
-
-        json_data = {
-            "jsonrpc": "2.0",
-            "method": "action.create",
-            "params": {
-                "name": actionName,  # action名字
-                "eventsource": 0,  # 0 - event created by a trigger;
-                # 1 - event created by a discovery rule;
-                # 2 - event created by active agent auto-registration;
-                # 3 - internal event.
-                "status": 0,  # Whether the action is enabled or disabled.  0 - (default) enabled; 1 - disabled.
-                "esc_period": osc,
-                "def_shortdata": "{TRIGGER.STATUS}: {TRIGGER.NAME}",
-                "def_longdata":"{\r\n\"Trigger status\": \"{TRIGGER.STATUS}\",\r\n\"Trigger name\": \"{TRIGGER.NAME}\",\r\n\"Trigger severity\": \"{TRIGGER.SEVERITY}\",\r\n\"Action name\": \"{ACTION.NAME}\",\r\n\"Event ID\": \"{EVENT.ID}\",\r\n\"Event value\": \"{EVENT.VALUE}\",\r\n\"Event status\": \"{EVENT.STATUS}\", \r\n\"Event time\": \"{EVENT.TIME}\",\r\n\"Event date\": \"{EVENT.DATE}\",\r\n\"Event age\": \"{EVENT.AGE}\",\r\n\"Event acknowledgement\": \"{EVENT.ACK.STATUS}\",\r\n\"Event acknowledgement history\": \"{EVENT.ACK.HISTORY}\",\r\n\"Item values\": \"{ITEM.NAME1} ({HOST.NAME1}:{ITEM.KEY1}): {ITEM.VALUE1}\",\r\n\"Original event ID\": \"{EVENT.ID}\"\r\n}",
-                "recovery_msg": 1,
-                "r_longdata": "{\r\n\"Trigger status\": \"{TRIGGER.STATUS}\",\r\n\"Trigger name\": \"{TRIGGER.NAME}\",\r\n\"Trigger severity\": \"{TRIGGER.SEVERITY}\",\r\n\"Action name\": \"{ACTION.NAME}\",\r\n\"Event ID\": \"{EVENT.ID}\",\r\n\"Event value\": \"{EVENT.VALUE}\",\r\n\"Event status\": \"{EVENT.STATUS}\", \r\n\"Event time\": \"{EVENT.TIME}\",\r\n\"Event date\": \"{EVENT.DATE}\",\r\n\"Event age\": \"{EVENT.AGE}\",\r\n\"Event acknowledgement\": \"{EVENT.ACK.STATUS}\",\r\n\"Event acknowledgement history\": \"{EVENT.ACK.HISTORY}\",\r\n\"Item values\": \"{ITEM.NAME1} ({HOST.NAME1}:{ITEM.KEY1}): {ITEM.VALUE1}\",\r\n\"Original event ID\": \"{EVENT.ID}\"\r\n}",
-                "r_shortdata": "{TRIGGER.STATUS}: {TRIGGER.NAME}",
-                "filter": {
-                    "evaltype": 0,  # 0 - and/or; 1 - and; 2 - or; 3 - custom expression.
-                    "conditions": [
-                        {
-                            "conditiontype": 2,
+        judge = request.POST.get('judge')
+        if judge == "0":
+            json_data = {
+                "jsonrpc": "2.0",
+                "method": "action.create",
+                "params": {
+                    "name": actionName,  # action名字
+                    "eventsource": 0,  # 0 - event created by a trigger;
+                    # 1 - event created by a discovery rule;
+                    # 2 - event created by active agent auto-registration;
+                    # 3 - internal event.
+                    "status": 0,  # Whether the action is enabled or disabled.  0 - (default) enabled; 1 - disabled.
+                    "esc_period": osc,
+                    "def_shortdata": "{TRIGGER.STATUS}: {TRIGGER.NAME}",
+                    "def_longdata":"{\r\n\"Trigger status\": \"{TRIGGER.STATUS}\",\r\n\"Trigger name\": \"{TRIGGER.NAME}\",\r\n\"Trigger severity\": \"{TRIGGER.SEVERITY}\",\r\n\"Action name\": \"{ACTION.NAME}\",\r\n\"Event ID\": \"{EVENT.ID}\",\r\n\"Event value\": \"{EVENT.VALUE}\",\r\n\"Event status\": \"{EVENT.STATUS}\", \r\n\"Event time\": \"{EVENT.TIME}\",\r\n\"Event date\": \"{EVENT.DATE}\",\r\n\"Event age\": \"{EVENT.AGE}\",\r\n\"Event acknowledgement\": \"{EVENT.ACK.STATUS}\",\r\n\"Event acknowledgement history\": \"{EVENT.ACK.HISTORY}\",\r\n\"Item values\": \"{ITEM.NAME1} ({HOST.NAME1}:{ITEM.KEY1}): {ITEM.VALUE1}\",\r\n\"Original event ID\": \"{EVENT.ID}\"\r\n}",
+                    "recovery_msg": 1,
+                    "r_longdata": "{\r\n\"Trigger status\": \"{TRIGGER.STATUS}\",\r\n\"Trigger name\": \"{TRIGGER.NAME}\",\r\n\"Trigger severity\": \"{TRIGGER.SEVERITY}\",\r\n\"Action name\": \"{ACTION.NAME}\",\r\n\"Event ID\": \"{EVENT.ID}\",\r\n\"Event value\": \"{EVENT.VALUE}\",\r\n\"Event status\": \"{EVENT.STATUS}\", \r\n\"Event time\": \"{EVENT.TIME}\",\r\n\"Event date\": \"{EVENT.DATE}\",\r\n\"Event age\": \"{EVENT.AGE}\",\r\n\"Event acknowledgement\": \"{EVENT.ACK.STATUS}\",\r\n\"Event acknowledgement history\": \"{EVENT.ACK.HISTORY}\",\r\n\"Item values\": \"{ITEM.NAME1} ({HOST.NAME1}:{ITEM.KEY1}): {ITEM.VALUE1}\",\r\n\"Original event ID\": \"{EVENT.ID}\"\r\n}",
+                    "r_shortdata": "{TRIGGER.STATUS}: {TRIGGER.NAME}",
+                    "filter": {
+                        "evaltype": 0,  # 0 - and/or; 1 - and; 2 - or; 3 - custom expression.
+                        "conditions": [
+                            {
+                                "conditiontype": 2,
+                                # Possible values for trigger actions: 0 - host group; 1 - host; 2 - trigger; 3 - trigger name;
+                                # 4 - trigger severity; 5 - trigger value; 6 - time period; 13 - host template; 15 - application; 16 - maintenance status.
+                                "operator": 0,
+                                # Possible values: 0 - (default) =; 1 - <>; 2 - like; 3 - not like; 4 - in; 5 - >=; 6 - <=; 7 - not in.
+                                "value": triggerId  # triggerid
+                            },
+                            # {
+                            # "conditiontype": 1,
                             # Possible values for trigger actions: 0 - host group; 1 - host; 2 - trigger; 3 - trigger name;
                             # 4 - trigger severity; 5 - trigger value; 6 - time period; 13 - host template; 15 - application; 16 - maintenance status.
-                            "operator": 0,
+                            # "operator": 0,
                             # Possible values: 0 - (default) =; 1 - <>; 2 - like; 3 - not like; 4 - in; 5 - >=; 6 - <=; 7 - not in.
-                            "value": triggerId  # triggerid
-                        },
-                        # {
-                        # "conditiontype": 1,
-                        # Possible values for trigger actions: 0 - host group; 1 - host; 2 - trigger; 3 - trigger name;
-                        # 4 - trigger severity; 5 - trigger value; 6 - time period; 13 - host template; 15 - application; 16 - maintenance status.
-                        # "operator": 0,
-                        # Possible values: 0 - (default) =; 1 - <>; 2 - like; 3 - not like; 4 - in; 5 - >=; 6 - <=; 7 - not in.
-                        # "value": "10124"  # hostid
-                        # },
-                    ],
+                            # "value": "10124"  # hostid
+                            # },
+                        ],
+
+                    },
+                    "operations": json_html,
+                    "recovery_operations": json_mail,
 
                 },
-                "operations": json_html,
-                "recovery_operations": json_html,
+                "auth": auth_code,
+                "id": 1
+            }
+        else:
+            actionId = request.POST.get('actionId')
+            json_data = {
+                "jsonrpc": "2.0",
+                "method": "action.update",
+                "params": {
+                    "actionid":actionId,
+                    "operations": json_html,
+                    "recovery_operations": json_mail,
 
-            },
-            "auth": auth_code,
-            "id": 1
-        }
-
+                },
+                "auth": auth_code,
+                "id": 1
+            }
         # print type(json_data)
-        # print json_data
+        print json_data
         #
         # 用得到的SESSIONID去验证，获取主机的信息(用http.get方法)
         if len(auth_code) == 0:
-            sys.exit(1)
+            sys.exit(1)#有错误退出
         if len(auth_code) != 0:
             host_create_data = json.dumps(json_data)
 
             # create request object
-            request2 = urllib2.Request(zabbix_url, host_create_data)
+            request2 = urllib2.Request(zabbix_url, host_create_data)#urllib2可以接受一个Request类的实例来设置URL请求的headers
             for key in zabbix_header:
                 request2.add_header(key, zabbix_header[key])
 
             # get host list
             try:
-                result = urllib2.urlopen(request2)
+                result = urllib2.urlopen(request2)#urllib2.Request.urlopen打开
             except URLError as e:
                 if hasattr(e, 'reason'):
                     print 'We failed to reach a server.'
@@ -597,34 +819,71 @@ def add_action(request):
             else:
                 response = json.loads(result.read())
                 result.close()
-                # print response
+                print response
                 action_data={"actionName":actionName}
+                #--------------------------------下面为保存脚本以及下发脚本的代码-----------------------------------#
+                text1 = request.POST.getlist('text1')
+                stepname = request.POST.getlist('sname')
+                # text2 = request.POST.get('uploadscript')
+                text23 = request.FILES.getlist('upload_script')
+                # print type(text23),text23,type(from1),from1
+                nn = len(from1)
+                for i in range(nn):
+                    fp = open("/etc/zabbix/script/%s.py" % (stepname[i]), 'w+')#新建，替换读写，r+不能创建，只替换
+                    fp.write(text1[i])
+                    fp.close()
+                    os.chmod("/etc/zabbix/script/%s.py" % (stepname[i]), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)  # mode:777
+                    #os.chown("/etc/zabbix/script/%s.py" % (stepname[i]), 988,983);  # uid=988(zabbix) gid=983(zabbix) 组=983(zabbix)
+                    # fp2 = open("/etc/zabbix/aa/%s.sh" %(stepname), 'w+')
+                    # fp2.write(text2)
+                    # fp2.close()
+
+                    os.system("scp -p /etc/zabbix/script/%s.py %s:/etc/zabbix/script/%s.py" % (stepname[i],hostip[i],stepname[i]))
+                    with open('/etc/zabbix/script/%s.sh' % (stepname[i]), 'wb+') as destination:
+                        for chunk in text23[i].chunks():
+                            destination.write(chunk)
+                    os.chmod("/etc/zabbix/script/%s.sh" % (stepname[i]), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)  # mode:777
+                    #os.chown("/etc/zabbix/script/%s.sh" % (stepname[i]), 988, 983);  # uid=988(zabbix) gid=983(zabbix) 组=983(zabbix
+                    os.system("scp -p /etc/zabbix/script/%s.sh %s:/etc/zabbix/script/%s.sh" % (stepname[i],hostip[i],stepname[i]))
                 return render(request, 'main/add_action.html',locals())
+        # -----------------------update-----------------------
+
+    if 'updateactionId' in request.GET:  # 必须有if
+        updateactionId = request.GET['updateactionId']
+        os.system('python /usr/CMC/zabbix_api/zabbix_getaction.py')
+        action = models.caction.objects.values().filter(actionId=updateactionId)  # 取数据库的数据,取出的是ValuesQuerySet对象
+        action = list(action)  # 先转化为list，然后转化为json
+
+        return HttpResponse(json.dumps(action), content_type='application/json')
     return render(request, 'main/add_action.html',locals())
 
 def add_action_child(request):
+    myhostip = get_host_ip()
     if request.method == "POST":
         text1 = request.POST.get('text1')
-        stepname=request.POST.get('sname1')
-        text2 = request.POST.get('text2')
-        fp = open("/etc/zabbix/aa/%s.py" %(stepname),'w+')
+        stepname= request.POST.get('sname1')
+        # text2 = request.POST.get('uploadscript')
+        # text23=request.FILES.get('uploadscript')
+
+        fp = open("/etc/zabbix/script/%s.sh" %(stepname),'w+')
         fp.write(text1)
         fp.close()
-        os.chmod("/etc/zabbix/aa/%s.py" %(stepname), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)  # mode:777
-        os.chown("/etc/zabbix/aa/%s.py" %(stepname), 988, 983);#uid=988(zabbix) gid=983(zabbix) 组=983(zabbix)
-        fp2 = open("/etc/zabbix/aa/%s.sh" %(stepname), 'w+')
-        fp2.write(text2)
-        fp2.close()
-        os.chmod("/etc/zabbix/aa/%s.sh" %(stepname), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)  # mode:777
-        os.chown("/etc/zabbix/aa/%s.sh" %(stepname), 988, 983);#uid=988(zabbix) gid=983(zabbix) 组=983(zabbix
-        os.system("scp -p /etc/zabbix/aa/%s.py 192.168.1.90:/etc/zabbix/aa/%s.py" %(stepname,stepname))
-        os.system("scp -p /etc/zabbix/aa/%s.sh 192.168.1.90:/etc/zabbix/aa/%s.sh" % (stepname,stepname))
+        # os.chmod("/etc/zabbix/aa/%s.sh" %(stepname), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)  # mode:777
+        # os.chown("/etc/zabbix/aa/%s.py" %(stepname), 988, 983);#uid=988(zabbix) gid=983(zabbix) 组=983(zabbix)
+        # fp2 = open("/etc/zabbix/aa/%s.sh" %(stepname), 'w+')
+        # fp2.write(text2)
+        # fp2.close()
+
+
+        # os.system("scp -p /etc/zabbix/aa/%s.sh 192.168.1.90:/etc/zabbix/aa/%s.sh" %(stepname,stepname))
+
         return render(request, 'main/add_action_child.html', locals())
     return render(request,'main/add_action_child.html',locals())
 #-----------------------------------------------------------#
 
 
 def monitoring(request):
+    myhostip = get_host_ip()
     os.system('python /usr/CMC/zabbix_api/zabbix_gethost.py')
     os.system('python /usr/CMC/zabbix_api/zabbix_getitem.py')
     host = models.chost.objects.all()
@@ -663,6 +922,7 @@ def monitoring(request):
     return render(request, 'main/monitoring.html',locals())
 
 def diagnosis(request):
+    myhostip = get_host_ip()
     os.system('python /usr/CMC/zabbix_api/zabbix_gethost.py')
     os.system('python /usr/CMC/zabbix_api/zabbix_gettrigger.py')
     os.system('python /usr/CMC/zabbix_api/zabbix_getitem.py')
@@ -706,11 +966,12 @@ def diagnosis(request):
     return render(request, 'main/diagnosis.html',locals())
 
 def recovery(request):
+    myhostip = get_host_ip()
     recovery = models.crecovery.objects.all().order_by("-eventId")#按照id倒叙取出
          #客户端发来的数据
     if 'actionName' in request.GET:  # 必须有if
         actionName = request.GET['actionName']
-        fr = open('/etc/zabbix/aa/shiyan.yaml', "r")
+        fr = open('/etc/zabbix/script/return.yaml', "r")
         aa = yaml.load(fr)
         bb = []
         for i in aa:
@@ -727,24 +988,18 @@ def recovery(request):
         return HttpResponse(json.dumps(actionName), content_type='application/json')
     return render(request,'main/recovery.html',locals())
 
-def add_triggers_child(request):
-    os.system('python /usr/CMC/zabbix_api/zabbix_gethost.py')
-    host = models.chost.objects.all()
-    os.system('python /usr/CMC/zabbix_api/zabbix_getitem.py')
-    item = models.citem.objects.all()
-    #下面两步将数据库获得的queryset格式转换为json格式
-    data = serializers.serialize("json", item)
-    data1 = json.dumps(data)
-    return render(request,'main/add_triggers_child.html',locals())
+
 #----------------------------------------------------#
 
 
 def view_hostgroups(request):
+    myhostip = get_host_ip()
     os.system('python /usr/CMC/zabbix_api/zabbix_getgroup.py')
     hostgroups = models.chostgroups.objects.all()  # 取数据库的数据
     # 下面两步将数据库获得的queryset格式转换为json格式
     data = serializers.serialize("json", hostgroups)
     data1 = json.dumps(data)
+
     if 'hostgroupsId' in request.GET:#必须有if
         hostgroupsId = request.GET['hostgroupsId']
         json_data = {
@@ -789,6 +1044,7 @@ def view_hostgroups(request):
     return render(request, 'main/view_hostgroups.html', locals())
 
 def view_templates(request):
+    myhostip = get_host_ip()
     os.system('python /usr/CMC/zabbix_api/zabbix_gettemplate.py')
     templates = models.ctemplates.objects.all()
     # 下面两步将数据库获得的queryset格式转换为json格式
@@ -845,16 +1101,17 @@ def view_templates(request):
     return render(request, 'main/view_templates.html', locals())
 
 def view_host(request):
+    myhostip = get_host_ip()
     os.system('python /usr/CMC/zabbix_api/zabbix_gethost.py')
     host = models.chost.objects.all() #取数据库的数据
     #下面两步将数据库获得的queryset格式转换为json格式
     data = serializers.serialize("json", host)
     data1 = json.dumps(data)
-    os.system('python /usr/CMC/zabbix_api/zabbix_getinterface.py')
-    interface = models.cinterface.objects.all() #取数据库的数据
-    #下面两步将数据库获得的queryset格式转换为json格式
-    data2 = serializers.serialize("json", interface)
-    data3 = json.dumps(data2)
+    # os.system('python /usr/CMC/zabbix_api/zabbix_getinterface.py')
+    # interface = models.cinterface.objects.all() #取数据库的数据
+    # #下面两步将数据库获得的queryset格式转换为json格式
+    # data2 = serializers.serialize("json", interface)
+    # data3 = json.dumps(data2)
 
     os.system('python /usr/CMC/zabbix_api/zabbix_getitemgroup.py')
     itemgroup = models.citemgroups.objects.all()
@@ -944,6 +1201,7 @@ def view_host(request):
     return render(request, 'main/view_host.html', locals())
 
 def view_action(request):
+    myhostip = get_host_ip()
     os.system('python /usr/CMC/zabbix_api/zabbix_getaction.py')
     action = models.caction.objects.all()
     #下面两步将数据库获得的queryset格式转换为json格式
@@ -991,7 +1249,9 @@ def view_action(request):
 
 
     return render(request, 'main/view_action.html', locals())
+
 def view_itemgroups(request):
+    myhostip = get_host_ip()
     os.system('python /usr/CMC/zabbix_api/zabbix_getitemgroup.py')
     itemgroups = models.citemgroups.objects.all()
     #下面两步将数据库获得的queryset格式转换为json格式
@@ -1041,6 +1301,7 @@ def view_itemgroups(request):
     return render(request, 'main/view_itemgroups.html', locals())
 
 def view_items(request):
+    myhostip = get_host_ip()
     os.system('python /usr/CMC/zabbix_api/zabbix_getitem.py')
     item = models.citem.objects.all()
     #下面两步将数据库获得的queryset格式转换为json格式
@@ -1089,6 +1350,7 @@ def view_items(request):
     return render(request, 'main/view_items.html', locals())
 
 def view_triggers(request):
+    myhostip = get_host_ip()
     os.system('python /usr/CMC/zabbix_api/zabbix_gettrigger.py')
     trigger = models.ctrigger.objects.all()
     #下面两步将数据库获得的queryset格式转换为json格式

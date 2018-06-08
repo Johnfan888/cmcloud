@@ -6,7 +6,7 @@ import json
 import urllib2
 import sys
 from urllib2 import Request,urlopen,URLError,HTTPError
-from auth import zabbix_header,zabbix_pass,zabbix_url,zabbix_user,auth_code
+from auth import zabbix_header,zabbix_pass,zabbix_url,zabbix_user,auth_code,MySQLport,MySQLuser,MySQLpasswd
 import MySQLdb
 #request json
 json_data ={
@@ -56,9 +56,9 @@ if len(auth_code) != 0:
                 # 连接数据库
                 conn = MySQLdb.connect(
                     host='localhost',
-                    port=3306,
-                    user='root',
-                    passwd='123456',
+                    port=MySQLport,
+                    user=MySQLuser,
+                    passwd=MySQLpasswd,
                     db='cmc',
                     charset='utf8',
                 )
@@ -73,15 +73,16 @@ if len(auth_code) != 0:
                         #此处注意！！要加一个括号[]！！！
                         # print get_data
                         # 连接数据库mysql
-                        cur = conn.cursor()
+                        #cur = conn.cursor()
 
                         # 插入一条数据
                         sql2 = "insert into main_chostgroups values(%s,%s) "
                         try:
                             cur.execute(sql2, get_data)  # 执行sql语句
                             conn.commit()
-                            print "insert success!"
+                            #print "insert success!"
                         except:
                             print "Error: unable to fetch data"
+
                 cur.close()
                 conn.close()

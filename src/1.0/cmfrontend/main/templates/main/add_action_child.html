@@ -2,11 +2,9 @@
 <html lang="en">
 <head>
 <style>
-#a{
-float: left;
-}
 
-#text1,#text2{
+
+#text1{
 
 width: 485px;
 height: 500px;
@@ -14,56 +12,11 @@ max-width: 485px;
 max-height: 500px;
         }
 </style>
-<script src="http://img.jb51.net/jslib/jquery/jquery.js" type="text/javascript"></script>
-<script type="text/javascript">
-$(document).ready(function() {
-    $("#create").click(function () {
-        var checkValue=$("#script").val();//获取one的val
-        var obj =  document.getElementById("text1");
-        var obj2 =  document.getElementById("text2");
-        var actionstepname=$("#sname1").val();//将此分成两个部分前面的name和name后的步骤号
-        actionstep=actionstepname.charAt(actionstepname.length - 1)//获取action的步骤号
-        if (checkValue==1){
-            var txt1=$("#first").html();
-            //alert(txt2)
-            //var str1 = txt1.replace('A', 'B');//只修改第一个
-            var str1 = txt1.replace(/A/g,actionstepname);//修改全文
-            obj.innerHTML = str1;
-            //替换sh中的name
-            var txt2=$("#text2").html();
-            var str2 = txt2.replace(/A/g, actionstepname);//修改全文
-            obj2.innerHTML = str2;
-            }
-
-        else {
-            actionstepname = actionstepname.substr(0, actionstepname.length - 1);//获取action的name
-            var txt1=$("#more").html();//获取more的内容
-            a=actionstepname+actionstep;
-            //alert(a)
-            var str1 = txt1.replace(/A/g, a);//修改全文
-            var str1 = str1.replace(/B/g, actionstep);
-            c=actionstep-1;
-            var str1 = str1.replace(/C/g, c);
-            var str1 = str1.replace(/D/g, actionstepname);
-            //obj.value = str1;//替换，和34行的innerhtml一样功能//不一样！value传递过去的会有特殊字符的转译，不好
-            obj.innerHTML=str1;
-            //替换sh中的name
-            var txt2=$("#text2").html();
-            var str2 = txt2.replace(/A/g, a);//修改全文
-            //obj2.value = str2;
-            obj2.innerHTML = str2;
-        }
-
-    })
-})
-</script>
-<script type="text/javascript">
+{% load staticfiles %}
+<script src="{% static 'js/jquery.js' %}"  type="text/javascript"></script>
+{#<script src="http://img.jb51.net/jslib/jquery/jquery.js" type="text/javascript"></script>#}
+<script>
     function save() {
-        var command=$("#sname1").val();
-        //alert(command)
-        e='python' +' '+'/'+'etc'+'/' +'zabbix'+'/'+'aa'+'/'+command+'.'+'py'
-        //window.opener.document.getElementById('commands1').value = e;//将子窗口的值传送到父窗口
-        alert("command需要输入执行命令："+e)
         this.close();//确定后关闭
     }
 </script>
@@ -72,26 +25,16 @@ $(document).ready(function() {
 </head>
 <body>
 <div id="all">
-<form id="text" name="addaction" method="post" action="">
+<form id="text" name="addaction" method="post" enctype="multipart/form-data" action="http://127.0.0.1:8000/main/add_action_child/">
   {% csrf_token %}
 <div id="top">
-action step name<input id="sname1" name="sname1"/>
-<select id="script">
-    <option value="1">action first step script</option>
-    <option value="2">action more step script</option>
-</select>
-<button type="button" id="create" >create script</button>
+script name<input id="sname1" name="sname1"/>
 </div>
 <div id="a">
 <textarea id="text1" name="text1" rows="3" cols="20" >
 </textarea>
 </div>
-<div id="b">
-<textarea id="text2" name="text2">
-#name: A.sh
-#url: /etc/zabbix/aa/
-</textarea>
-</div>
+
 <div id="below">
 <p>
 
@@ -99,39 +42,9 @@ action step name<input id="sname1" name="sname1"/>
 </p>
 
 </div>
-<div id="first" name="first"  style="display: none;">#name: A.py
-#url: /etc/zabbix/aa/
-import commands
-import yaml
-import os
-output= commands.getoutput('sh /etc/zabbix/aa/A.sh')
-fr = open('/etc/zabbix/aa/shiyan.yaml',"a+")
-data ={'A':{'step':'1','value':output}}
-print data
-yaml.dump(data,fr)
-fr.close()
-os.system("nc 192.168.1.89 8899 < shiyan.yaml")
-</div>
-<div id="more" name="more" style="display: none">#name: A.py
-#url: /etc/zabbix/aa/
-import yaml
-import commands
-import os
-fr = open('/etc/zabbix/aa/shiyan.yaml',"r")
-aa= yaml.load(fr)
-bb=aa['DC']
-fr.close()
-cc=bb['value']
-output=commands.getoutput('sh /etc/zabbix/aa/A.sh %s' %(cc))
-data={'A':{'step':'B','value':output}}
-print data
-fr1 = open('/etc/zabbix/aa/shiyan.yaml',"a+")
-yaml.dump(data,fr1)
-fr1.close()
-os.system("nc 192.168.1.89 8899 < shiyan.yaml")
-</div>
+
 </form>
 </div>
-<p id="t"></p>
+
 </body>
 </html>

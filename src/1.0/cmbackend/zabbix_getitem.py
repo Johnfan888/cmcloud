@@ -6,15 +6,16 @@ import json
 import urllib2
 import sys
 from urllib2 import Request, urlopen, URLError, HTTPError
-from auth import zabbix_header,zabbix_user,zabbix_url,zabbix_pass,auth_code,auth_data
+from auth import zabbix_header,zabbix_user,zabbix_url,zabbix_pass,auth_code,auth_data,auth_code,MySQLport,MySQLuser,MySQLpasswd
 import MySQLdb
 json_data = {
     "jsonrpc": "2.0",
     "method": "item.get",
     "params": {
         "output": "extend",
-        # "hostids": "10109",
-        # "itemids":23910
+        "selectApplications":"extend",
+        # "hostids": "10177",
+        # "itemids":"27726"
 
     },
 }
@@ -55,9 +56,9 @@ if len(auth_code) != 0:
         # 连接数据库
         conn = MySQLdb.connect(
             host='localhost',
-            port=3306,
-            user='root',
-            passwd='123456',
+            port=MySQLport,
+            user=MySQLuser,
+            passwd=MySQLpasswd,
             db='cmc',
             charset='utf8',
         )
@@ -67,22 +68,26 @@ if len(auth_code) != 0:
         cur.execute(sql1)
         conn.commit()
         for item in response['result']:
-            get_data =[ item['itemid'],item['name'],item['key_'],item['status'],item['templateid'],item['hostid']]
-            # print get_data
+            for i in item['applications']:
+                get_data =[ item['itemid'],item['name'],item['key_'],item['status'],item['templateid'],item['hostid'],
+                        item['interfaceid'],item['value_type'],item['data_type'],item['units'],
+                        i['applicationid'],item['description']]
+                # print get_data
             # print item['templateid']
             # 连接数据库mysql
 
 
             # 插入一条数据
-            sql = "insert into main_citem values(%s,%s,%s,%s,%s,%s) "
+            sql = "insert into main_citem values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) "
             try:
                 cur.execute(sql, get_data)  # 执行sql语句
-
                 conn.commit()
-
-                print "insert success!"
+                # print "insert success!"
             except:
                 print "Error: unable to fetch data"
+                print get_data
+
+
 
         cur.close()
         conn.close()

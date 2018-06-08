@@ -1,16 +1,17 @@
-// host，interface下拉菜单二级联动
-$(document).ready(function(){
-$("#one").change(function(){
-$("#one option").each(function(i,o){
-if($(this).attr("selected"))
-{
-$(".two").hide();
-$(".two").eq(i).show();
-}
-});
-});
-$("#one").change();
-});
+// // host，interface下拉菜单二级联动
+// $(document).ready(function(){
+// $("#one").change(function(){
+// $("#one option").each(function(i,o){
+// if($(this).attr("selected"))
+// {
+// $(".two").hide();
+// $(".two").eq(i).show();
+// }
+// });
+// });
+// $("#one").change();
+// });
+
 
 // value，data下拉菜单二级联动
 $(document).ready(function(){

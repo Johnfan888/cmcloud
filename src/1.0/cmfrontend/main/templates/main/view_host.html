@@ -7,15 +7,17 @@
     font-size: 20px;
 }
     </style>
-    <script src="http://img.jb51.net/jslib/jquery/jquery.js" type="text/javascript"></script>
+    {% load staticfiles %}
+<script src="{% static 'js/jquery.js' %}"  type="text/javascript"></script>
+{#    <script src="http://img.jb51.net/jslib/jquery/jquery.js" type="text/javascript"></script>#}
     <script type="text/javascript">//动态添加表格并按条件修改
 $(document).ready(function(){
 
         $("#other ").empty("");//直接清除tbody，防止二次查询，第一次数据还在
            var List1={{ data1 | safe }} ;//把这个js提出去这里就会报错，不能从后台获取data1
            var host = JSON.parse(List1);//解析JSON字符串
-           var List2={{ data3 | safe }} ;//把这个js提出去这里就会报错，不能从后台获取data1
-           var interface = JSON.parse(List2);//解析JSON字符串
+           //var List2={{ data3 | safe }} ;//把这个js提出去这里就会报错，不能从后台获取data1
+           //var interface = JSON.parse(List2);//解析JSON字符串
 
 
                     // 动态创建表格的方式，使用动态创建dom对象的方式
@@ -31,16 +33,17 @@ $(document).ready(function(){
                         $trTemp.append("<td id=" + host[i].pk + ">" + host[i].fields.hostName + "</td>");
                         var name=host[i].fields.hostName;
                         var id=host[i].pk;
-                        $trTemp.append("<td >" + "<a href=\"http://127.0.0.1:8000/main/view_itemgroups/?id="+name+'='+id +"\" target=\"view\">" + "itemgroups" +"</a>" +"</td>");
-                        $trTemp.append("<td >" + "<a href=\"http://127.0.0.1:8000/main/view_items/?id="+name+'='+id +"\" target=\"view\">" +  "items"+"</a>" +"</td>");
-                        $trTemp.append("<td >" + "<a href=\"http://127.0.0.1:8000/main/view_triggers/?id="+name+'='+id +"\" target=\"view\">" +  "Triggers"+"</a>" +"</td>");
+                        $trTemp.append("<td >" + "<a href=\"http://{{ myhostip }}:8000/main/view_itemgroups/?id="+name+'='+id +"\" target=\"view\">" + "itemgroups" +"</a>" +"</td>");
+                        $trTemp.append("<td >" + "<a href=\"http://{{ myhostip }}:8000/main/view_items/?id="+name+'='+id +"\" target=\"view\">" +  "items"+"</a>" +"</td>");
+                        $trTemp.append("<td >" + "<a href=\"http://{{ myhostip }}:8000/main/view_triggers/?id="+name+'='+id +"\" target=\"view\">" +  "Triggers"+"</a>" +"</td>");
                         //$trTemp.append("<td>" +host[i].pk +"</td>");
-                        for (var j = 0; j < interface.length; j++) {//将itemid显示为对应的name
+                        /*for (var j = 0; j < interface.length; j++) {//将itemid显示为对应的name
                             if (host[i].pk == interface[j].fields.hostId) {
                                 $trTemp.append("<td >" + interface[j].fields.hostIp + "</td>");
 
                             }
-                        }
+                        }*/
+                        $trTemp.append("<td >" + host[i].fields.hostIp + "</td>");
                             //$trTemp.append("<td>" + item[i].fields.templateId + "</td>");
 
                         if (host[i].fields.hostStatus == 0) {//判断条件
@@ -54,8 +57,8 @@ $(document).ready(function(){
                             }
 
                                     //下面为每行末尾添加删除更新按钮
-                        $trTemp.append("<td><input  id=\"\" type=\"submit\" name=\"Submit\" value=\"Update\"/ ></td>");
-                        $trTemp.append("<td><input id=\"delete\" type=\"button\" name=\"delete\" value=\"Delete\"/ onclick=\"dd('other',this)\"></td>");
+                        $trTemp.append("<td><input  id=\"\" type=\"submit\" name=\"Submit\" value=\"Update\" onclick=\"ccc('other',this)\"></td>");
+                        $trTemp.append("<td><input id=\"delete\" type=\"button\" name=\"delete\" value=\"Delete\" onclick=\"dd('other',this)\"></td>");
                         $trTemp.appendTo("#other");
                         }
 
@@ -75,7 +78,7 @@ function dd(tableID,obj) {
         $.ajax({
             type:"get",
             data: {'hostId':hostId},
-            url: "http://127.0.0.1:8000/main/view_host/", //后台处理函数的url 这里用的是static url 需要与urls.py中的name一致,或者直接写http地址
+            url: "http://{{ myhostip }}:8000/main/view_host/", //后台处理函数的url 这里用的是static url 需要与urls.py中的name一致,或者直接写http地址
             cache: false,
             dataType: "json",
             success: function(){
@@ -113,7 +116,7 @@ function cc(tableID,obj) {
         $.ajax({
             type:"get",
             data: {'UhostId':hostId,"UhostStatus":hostStatus},
-            url: "http://127.0.0.1:8000/main/view_host/", //后台处理函数的url 这里用的是static url 需要与urls.py中的name一致,或者直接写http地址
+            url: "http://{{ myhostip }}:8000/main/view_host/", //后台处理函数的url 这里用的是static url 需要与urls.py中的name一致,或者直接写http地址
             cache: false,
             dataType: "json",
             success: function(){
@@ -130,7 +133,25 @@ function cc(tableID,obj) {
 
 
 </script>
+<script>//update
+function ccc(tableID,obj) {
+    var rowIndex = obj.parentElement.parentElement.rowIndex;//获取点击按钮的这一行
+    var hostId =  $('table tr:eq('+rowIndex+') td:eq(0)').attr("id");//获取要删除这一行的第二列内容id
+    //alert(hostgroupsId)
+               var url="http://{{ myhostip }}:8000/main/add_host/?id="+hostId+"";                             //转向网页的地址;
+               var name='';                            //网页名称，可为空;
+               var iWidth=800;                          //弹出窗口的宽度;
+               var iHeight=500;                         //弹出窗口的高度;
+               //获得窗口的垂直位置
+               var iTop = (window.screen.availHeight - 30 - iHeight) / 2;
+               //获得窗口的水平位置
+               var iLeft = (window.screen.availWidth - 10 - iWidth) / 2;
+               //弹出窗口，并居中
+               window.open(url, name, 'height=' + iHeight + ',,innerHeight=' + iHeight + ',width=' + iWidth + ',innerWidth=' + iWidth + ',top=' + iTop + ',left=' + iLeft + ',status=no,toolbar=no,menubar=no,location=no,resizable=no,scrollbars=0,titlebar=no');
 
+}
+
+</script>
     <title>host</title>
 </head>
 <body>
