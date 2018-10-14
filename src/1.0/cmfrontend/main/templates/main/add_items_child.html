@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    {% load staticfiles %}
+<script src="{% static 'js/jquery.js' %}"  type="text/javascript"></script>
+
+<style>
+
+
+#text{
+
+width: 700px;
+height: 300px;
+
+{#overflow-y:visible#}
+        }
+</style>
+<script>
+        function up(a) {
+            $("#filename").val(a.value)//赋值
+
+        }
+</script>
+<script>
+$(function url() {//将url中的父界面的itemname解析出来
+    urlinfo = window.location.href; //获取当前页面的url
+    len = urlinfo.length;//获取url的长度
+    offset = urlinfo.indexOf("?");//设置参数字符串开始的位置
+    newsidinfo = urlinfo.substr(offset, len)//取出参数字符串 这里会获得类似“id=1”这样的字符串
+    newsids = newsidinfo.split("=");//对获得的参数字符串按照“=”进行分割
+    newsid1 = newsids[1];//得到第一个参数值hostname
+    $("#item_name").val(newsid1)//赋值
+
+    })
+</script>
+<script>
+function ok() {
+        var item_key=$("#item_key").val();
+        var item_name=$("#item_name").val();
+
+        window.opener.document.getElementById('itemKey').value = item_key;//将子窗口的值传送到父窗口
+        agent_conf="UserParameter="+item_key+", /etc/zabbix/script/"+item_name+".sh"
+        $("#agent_conf").val(agent_conf)//赋值
+        //this.close();//关闭窗口
+
+}
+
+</script>
+</head>
+<body>
+<form id="up_script"  method="post" enctype="multipart/form-data">
+{#上传文件需要enctype="multipart/form-data"#}
+  {% csrf_token %}
+<p>
+   <textarea id="item_name" name="item_name" style="display: none"></textarea>
+   <textarea id="agent_conf" name="agent_conf" style="display: none"></textarea>
+</p>
+<p>
+    Choose a way to edit the script:
+</p>
+<p>1.Select your script:
+     <input type="file" name="upload_script" id="upload_script"  style="display: none" onchange="up(this)"/>
+     <input type="filename" id="filename" name="filename" value="" style="width:100px"/>
+     <input type="button" id="file_button" name="file_button" value="choose" onclick="upload_script.click()"/>
+</p>
+<p>2.Write your script:</p>
+<p>
+    <textarea id="text" name="text" ></textarea>
+</p>
+<p>Item key:
+    <input type="text" id="item_key" name="item_key"  />
+</p>
+<p>Select your host to upload:
+   <select id="host"  name="host" >
+            {#循环取出host中的hostid和hostname  #}
+            {% for host in host %}
+            <option value="{{ host.hostIp }}" >{{ host.hostName }}</option>
+            {% endfor %}
+  </select>
+</p>
+{#<input type='button'  value='ok' onclick="ok()"/>#}
+<input type="submit"  id="Submit" value="Submit" onclick=" return ok()"/>
+
+
+</form>
+</body>
+</html>

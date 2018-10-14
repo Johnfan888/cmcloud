@@ -61,7 +61,7 @@ class citem(models.Model):
     itemName = models.CharField(max_length=255)
     itemKey = models.CharField(max_length=255)
     itemStatus = models.IntegerField(max_length=1)
-    templateId = models.IntegerField(max_length=10)
+    # templateId = models.IntegerField(null=True,max_length=10)
     hostId = models.IntegerField(max_length=10)
     interfaceId = models.IntegerField(max_length=8)
     valuetype = models.IntegerField(null=True,max_length=2)
@@ -93,13 +93,48 @@ class crecovery(models.Model):
     recoveryDate = models.CharField(max_length=255)
     actionName = models.CharField(max_length=255)
     triggerStatus = models.CharField(max_length=50)
-    triggerSeverity = models.CharField(max_length=50)
-    triggerName = models.CharField(max_length=255)
     itemValues = models.CharField(max_length=50)
+    triggerSeverity = models.CharField(max_length=50)
     eventId = models.IntegerField(primary_key=True)
-    eventValue = models.IntegerField(max_length=10)
     eventStatus= models.CharField(max_length=10)
+    eventValue = models.IntegerField(max_length=10)
     originaleventID = models.IntegerField(max_length=10)
+    triggerName = models.CharField(max_length=255)
+    returnValue = models.CharField(null=True,max_length=255)
+    # 返回相应的值
+    def __unicode__(self):
+         return self.eventId
+#恢复表-旧
+class crecovery_old(models.Model):
+    recoveryTime = models.CharField(max_length=255)
+    recoveryDate = models.CharField(max_length=255)
+    actionName = models.CharField(max_length=255)
+    triggerStatus = models.CharField(max_length=50)
+    itemValues = models.CharField(max_length=50)
+    triggerSeverity = models.CharField(max_length=50)
+    eventId = models.IntegerField(primary_key=True)
+    eventStatus= models.CharField(max_length=10)
+    eventValue = models.IntegerField(max_length=10)
+    originaleventID = models.IntegerField(max_length=10)
+    triggerName = models.CharField(max_length=255)
+    returnValue = models.CharField(null=True,max_length=255)
+
+    # 返回相应的值
+    def __unicode__(self):
+         return self.eventId
+#恢复表—新
+class crecovery_new(models.Model):
+    recoveryTime = models.CharField(max_length=255)
+    recoveryDate = models.CharField(max_length=255)
+    actionName = models.CharField(max_length=255)
+    triggerStatus = models.CharField(max_length=50)
+    itemValues = models.CharField(max_length=50)
+    triggerSeverity = models.CharField(max_length=50)
+    eventId = models.IntegerField(primary_key=True)
+    eventStatus= models.CharField(max_length=10)
+    eventValue = models.IntegerField(max_length=10)
+    originaleventID = models.IntegerField(max_length=10)
+    triggerName = models.CharField(max_length=255)
     returnValue = models.CharField(null=True,max_length=255)
     # 返回相应的值
     def __unicode__(self):

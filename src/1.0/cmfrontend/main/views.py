@@ -180,9 +180,8 @@ def add_host(request):
     return render(request,'main/add_host.html',locals())
 
 def add_hostgroups(request):
-    myhostip = get_host_ip()
     # 点提交进行的步骤
-
+    myhostip = get_host_ip()
     if request.method == "POST":
         judge = request.POST.get('judge')
         hostgroupsName = request.POST.get('hostgroupsName')
@@ -236,7 +235,7 @@ def add_hostgroups(request):
                 result.close()
                 # print response
                 aa = {'b': hostgroupsName}
-                return render(request, 'main/add_hostgroups.html', aa)
+                return render(request, 'main/add_hostgroups.html', locals())
     #-----------------------update-----------------------
 
     if 'updatehostgroupsId' in request.GET:#必须有if
@@ -246,7 +245,9 @@ def add_hostgroups(request):
         host=list(host)#先转化为list，然后转化为json
 
         return HttpResponse(json.dumps(host), content_type='application/json')
-    return render(request, 'main/add_hostgroups.html')
+
+    return render(request, 'main/add_hostgroups.html',locals())
+
 
 def add_templates(request):
     myhostip = get_host_ip()
@@ -479,7 +480,7 @@ def add_items(request):
                 # 0 - numeric float; 1 - character; 2 - log; 3 - numeric unsigned; 4 - text.
                     "data_type": datatype,  # 0 - (default) decimal; 1 - octal; 2 - hexadecimal; 3 - boolean.
                     # zai interface biaoli yilaiyu hostid
-                    "applications": itemgroups,
+                    "applications": [itemgroups],
                     "description": description,
                     "units": unit,
                     "delay": 30
@@ -525,6 +526,35 @@ def add_items(request):
 
         return HttpResponse(json.dumps(item), content_type='application/json')
     return render(request, 'main/add_items.html',locals())
+
+def add_items_child(request):
+    myhostip = get_host_ip()
+    host = models.chost.objects.all()
+    os.system('python /usr/CMC/zabbix_api/zabbix_getitem.py')
+    if request.method == "POST":
+        item_name = request.POST.get('item_name')
+        item_key = request.POST.get('item_key')
+        hostIp = request.POST.get('host')
+        text1 = request.POST.get('text')
+        agent_conf = request.POST.get('agent_conf')
+        fp = open("/etc/zabbix/script/%s.conf" % (item_key), 'w+')
+        fp.write(agent_conf)
+        fp.close()
+        if text1 == "":
+            text2 = request.FILES.get('upload_script')
+            with open('/etc/zabbix/script/%s.sh' % (item_name), 'wb+') as destination:
+                for chunk in text2.chunks():
+                    destination.write(chunk)
+        else:
+            fp = open("/etc/zabbix/script/%s.sh" % (item_name), 'w+')
+            fp.write(text1)
+            fp.close()
+
+        os.system("scp -p /etc/zabbix/script/%s.conf %s:/etc/zabbix/zabbix_agentd.d/%s.conf" %(item_key,hostIp,item_key))
+        os.chmod("/etc/zabbix/script/%s.sh" % (item_name), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)  # mode:777
+        os.system("scp -p /etc/zabbix/script/%s.sh %s:/etc/zabbix/script/%s.sh" %(item_name,hostIp,item_name))
+        return render(request, 'main/add_items_child.html', locals())
+    return render(request,'main/add_items_child.html',locals())
 
 def add_triggers(request):
     myhostip = get_host_ip()
@@ -590,7 +620,14 @@ def add_triggers(request):
                 # print response
                 trigger_data = {'triggersname': triggersname, 'condition': condition, 'description':description,
                                 'severity':severity}
-
+                #---name和condition写入txt
+                fp = open("/usr/CMC/zabbix_api/trigger_condition.txt" , 'w+')
+                fp.write(triggersname)
+                fp.write("\n")
+                fp.write(condition)
+                fp.close()
+                os.system('python /usr/CMC/zabbix_api/zabbix_gettrigger.py')
+                os.system('python /usr/CMC/zabbix_api/trigger_condition.py')
                 return render(request, 'main/add_triggers.html', locals())
     if 'updatetriggersId' in request.GET:#必须有if
         updatetriggersId= request.GET['updatetriggersId']
@@ -629,6 +666,7 @@ def add_action(request):
     #下面两步将数据库获得的queryset格式转换为json格式
     data2 = serializers.serialize("json",trigger)
     data3 = json.dumps(data2)
+
     if request.method == "POST":
         actionName = request.POST.get('actionName')
         hostId = request.POST.get('hostId')
@@ -725,6 +763,7 @@ def add_action(request):
         # --------------------拼接直接相加list------
 
         json_html = json_command + json_mail
+        # print json_html
         # 类型list三者均是
         # print type(json_command)
         # print type(json_mail)
@@ -733,6 +772,7 @@ def add_action(request):
         #     #request json //create host
         judge = request.POST.get('judge')
         if judge == "0":
+            # print 111
             json_data = {
                 "jsonrpc": "2.0",
                 "method": "action.create",
@@ -778,7 +818,10 @@ def add_action(request):
                 "auth": auth_code,
                 "id": 1
             }
+            # print json_data
         else:
+            # print 2222
+
             actionId = request.POST.get('actionId')
             json_data = {
                 "jsonrpc": "2.0",
@@ -793,7 +836,7 @@ def add_action(request):
                 "id": 1
             }
         # print type(json_data)
-        print json_data
+        #     print json_data
         #
         # 用得到的SESSIONID去验证，获取主机的信息(用http.get方法)
         if len(auth_code) == 0:
@@ -819,32 +862,35 @@ def add_action(request):
             else:
                 response = json.loads(result.read())
                 result.close()
-                print response
+                # print response
                 action_data={"actionName":actionName}
                 #--------------------------------下面为保存脚本以及下发脚本的代码-----------------------------------#
                 text1 = request.POST.getlist('text1')
                 stepname = request.POST.getlist('sname')
                 # text2 = request.POST.get('uploadscript')
                 text23 = request.FILES.getlist('upload_script')
+                print text23
                 # print type(text23),text23,type(from1),from1
+
                 nn = len(from1)
                 for i in range(nn):
-                    fp = open("/etc/zabbix/script/%s.py" % (stepname[i]), 'w+')#新建，替换读写，r+不能创建，只替换
-                    fp.write(text1[i])
-                    fp.close()
-                    os.chmod("/etc/zabbix/script/%s.py" % (stepname[i]), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)  # mode:777
-                    #os.chown("/etc/zabbix/script/%s.py" % (stepname[i]), 988,983);  # uid=988(zabbix) gid=983(zabbix) 组=983(zabbix)
-                    # fp2 = open("/etc/zabbix/aa/%s.sh" %(stepname), 'w+')
-                    # fp2.write(text2)
-                    # fp2.close()
+                    if text1[i] != "":
+                        fp = open("/etc/zabbix/script/%s.py" % (stepname[i]), 'w+')#新建，替换读写，r+不能创建，只替换
+                        fp.write(text1[i])
+                        fp.close()
+                        os.chmod("/etc/zabbix/script/%s.py" % (stepname[i]), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)  # mode:777
+                        #os.chown("/etc/zabbix/script/%s.py" % (stepname[i]), 988,983);  # uid=988(zabbix) gid=983(zabbix) 组=983(zabbix)
+                        # fp2 = open("/etc/zabbix/aa/%s.sh" %(stepname), 'w+')
+                        # fp2.write(text2)
+                        # fp2.close()
+                        os.system("scp -p /etc/zabbix/script/%s.py %s:/etc/zabbix/script/%s.py" % (stepname[i],hostip[i],stepname[i]))
+                        with open('/etc/zabbix/script/%s.sh' % (stepname[i]), 'wb+') as destination:
+                            for chunk in text23[i].chunks():
+                                destination.write(chunk)
+                        os.chmod("/etc/zabbix/script/%s.sh" % (stepname[i]), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)  # mode:777
+                        #os.chown("/etc/zabbix/script/%s.sh" % (stepname[i]), 988, 983);  # uid=988(zabbix) gid=983(zabbix) 组=983(zabbix
+                        os.system("scp -p /etc/zabbix/script/%s.sh %s:/etc/zabbix/script/%s.sh" % (stepname[i],hostip[i],stepname[i]))
 
-                    os.system("scp -p /etc/zabbix/script/%s.py %s:/etc/zabbix/script/%s.py" % (stepname[i],hostip[i],stepname[i]))
-                    with open('/etc/zabbix/script/%s.sh' % (stepname[i]), 'wb+') as destination:
-                        for chunk in text23[i].chunks():
-                            destination.write(chunk)
-                    os.chmod("/etc/zabbix/script/%s.sh" % (stepname[i]), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)  # mode:777
-                    #os.chown("/etc/zabbix/script/%s.sh" % (stepname[i]), 988, 983);  # uid=988(zabbix) gid=983(zabbix) 组=983(zabbix
-                    os.system("scp -p /etc/zabbix/script/%s.sh %s:/etc/zabbix/script/%s.sh" % (stepname[i],hostip[i],stepname[i]))
                 return render(request, 'main/add_action.html',locals())
         # -----------------------update-----------------------
 
@@ -860,20 +906,22 @@ def add_action(request):
 def add_action_child(request):
     myhostip = get_host_ip()
     if request.method == "POST":
-        text1 = request.POST.get('text1')
-        stepname= request.POST.get('sname1')
-        # text2 = request.POST.get('uploadscript')
-        # text23=request.FILES.get('uploadscript')
-
-        fp = open("/etc/zabbix/script/%s.sh" %(stepname),'w+')
+        item_name= request.POST.get('item_name')
+        # print item_name
+        # print 123
+        item_key = request.POST.get('item_key')
+        host = request.POST.get('host')
+        text1 = request.POST.get('text')
+        text2 = request.FILES.get('upload_script')
+        fp = open("/etc/zabbix/script/%s.sh" %(item_name),'w+')
         fp.write(text1)
         fp.close()
-        # os.chmod("/etc/zabbix/aa/%s.sh" %(stepname), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)  # mode:777
-        # os.chown("/etc/zabbix/aa/%s.py" %(stepname), 988, 983);#uid=988(zabbix) gid=983(zabbix) 组=983(zabbix)
-        # fp2 = open("/etc/zabbix/aa/%s.sh" %(stepname), 'w+')
+        # fp2 = open("/etc/zabbix/script/%s.sh" %(item_name), 'w+')
         # fp2.write(text2)
         # fp2.close()
-
+        # with open('/etc/zabbix/script/%s.sh' % (item_name), 'wb+') as destination:
+        #     for chunk in text2.chunks():
+        #         destination.write(chunk)
 
         # os.system("scp -p /etc/zabbix/aa/%s.sh 192.168.1.90:/etc/zabbix/aa/%s.sh" %(stepname,stepname))
 
@@ -968,24 +1016,13 @@ def diagnosis(request):
 def recovery(request):
     myhostip = get_host_ip()
     recovery = models.crecovery.objects.all().order_by("-eventId")#按照id倒叙取出
-         #客户端发来的数据
-    if 'actionName' in request.GET:  # 必须有if
-        actionName = request.GET['actionName']
-        fr = open('/etc/zabbix/script/return.yaml', "r")
-        aa = yaml.load(fr)
-        bb = []
-        for i in aa:
-            if '%s'%(actionName) in i:
-                cc = {'actionStepName': i, 'returnValue': aa[i]['value']}
-                bb.append(cc)
-        bb=str(bb)
-        cursor = connection.cursor()
-        # 连接数据库
-        cursor.execute("SELECT eventId from main_crecovery WHERE returnValue is NULL AND actionName=%s",[actionName])
-        eventId = cursor.fetchone()      #取到eventId,
-        cursor.execute("UPDATE main_crecovery set returnValue=%s where eventId=%s",[bb,eventId])
-        cursor.close()
-        return HttpResponse(json.dumps(actionName), content_type='application/json')
+    recovery = serializers.serialize("json", recovery)
+    recovery = json.dumps(recovery)
+    recovery_new = models.crecovery_new.objects.all().order_by("-eventId")#按照id倒叙取出
+    recovery_new = serializers.serialize("json", recovery_new)
+    recovery_new = json.dumps(recovery_new)
+    # 客户端发来的数据
+
     return render(request,'main/recovery.html',locals())
 
 
@@ -1247,7 +1284,45 @@ def view_action(request):
 
         return HttpResponse(json.dumps(actionId), content_type='application/json')
 
+    if 'UactionId' in request.GET:  # 必须有if
+        actionId = request.GET['UactionId']
+        actionStatus = request.GET['UactionStatus']
+        json_data = {
+            "jsonrpc": "2.0",
+            "method": "action.update",
+            "params": {
+                "actionid": actionId,
+                "status": actionStatus,
+            },
+            "auth": auth_code,
+            "id": 1
 
+        }
+        if len(auth_code) == 0:
+            sys.exit(1)
+        if len(auth_code) != 0:
+            host_create_data = json.dumps(json_data)
+
+            # create request object
+            request2 = urllib2.Request(zabbix_url, host_create_data)
+            for key in zabbix_header:
+                request2.add_header(key, zabbix_header[key])
+
+            # get host list
+            try:
+                result = urllib2.urlopen(request2)
+            except URLError as e:
+                if hasattr(e, 'reason'):
+                    print 'We failed to reach a server.'
+                    print 'Reason: ', e.reason
+                elif hasattr(e, 'code'):
+                    print 'The server could not fulfill the request.'
+                    print 'Error code: ', e.code
+            else:
+                response = json.loads(result.read())
+                result.close()
+                # print response
+        return HttpResponse(json.dumps(actionId), content_type='application/json')
     return render(request, 'main/view_action.html', locals())
 
 def view_itemgroups(request):

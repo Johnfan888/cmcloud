@@ -15,7 +15,14 @@
             c = $("#funcyion option:selected").val();
             d = document.getElementById('n').value;//获取输入框的值
             e='{'+a+':'+b+'.'+c+d;
-            window.opener.document.getElementById('name').value = e;//将子窗口的值传送到父窗口
+            condition=window.opener.document.getElementById('name')
+            if (condition.value == ""){
+                condition.value=e
+            }else {
+                condition.value=condition.value+" and "+e
+            }
+
+            {#window.opener.document.getElementById('name').value += e;//将子窗口的值传送到父窗口#}
             {#window.opener.child = null;#}
             this.close();//确定后关闭
         }

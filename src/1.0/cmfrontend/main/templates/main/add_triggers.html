@@ -85,6 +85,29 @@
 })
 
 </script>
+            <script >
+
+	function Submit() {
+	    document.addtriggers.submit();//提交表单
+           //js是单线程直接提交表单在关闭窗口是不行的，在此做一个ajax，去关闭窗口，后台不用接受数据？
+            $.ajax({
+            type:"get",
+            data: "",
+            url: "http://{{ myhostip }}:8000/main/add_triggers/", //后台处理函数的url 这里用的是static url 需要与urls.py中的name一致,或者直接写http地址
+            cache: false,
+            dataType: "text",
+            success: function(data){
+                window.close()
+                                   },
+            error: function(){
+                 alert("false");
+                              }
+        });
+
+
+    }
+
+</script>
     <meta charset="UTF-8">
     <title>triggers</title>
 </head>
@@ -115,7 +138,7 @@
   </select></p>
 
   <p>
-    <input type="submit" name="Submit" value="Submit" onclick="window.close()"/>
+    <input type="button" value="Submit"  onclick="Submit();"/>
   </p>
   <p>
       Added：{{ trigger_data }}

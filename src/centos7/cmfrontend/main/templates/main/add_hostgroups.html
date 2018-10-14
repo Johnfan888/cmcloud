@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html lang="en">
+<head>
+    {% load staticfiles %}
+{#    <link rel="stylesheet" type="text/css" href= "{% static 'css/add_hostgroups_style.css' %}" />#}
+<script src="{% static 'js/jquery-3.3.1.js' %}"  type="text/javascript"></script><meta charset="UTF-8">
+<script>
+ $(function update() {
+    urlinfo = window.location.href; //获取当前页面的url
+    len = urlinfo.length;//获取url的长度
+    offset = urlinfo.indexOf("?");//设置参数字符串开始的位置
+    newsidinfo = urlinfo.substr(offset, len)//取出参数字符串 这里会获得类似“id=1”这样的字符串
+    newsids = newsidinfo.split("=");//对获得的参数字符串按照“=”进行分割
+    updatehostgroupsId = newsids[1];//得到第一个参数值hostid
+    //alert(updatehostgroupsId)
+     $('#hostgroupsId').val(updatehostgroupsId)
+     //给后台一个判断添加还是更新的条件
+     var judge=$('#hostgroupsName').val()
+     if(judge.length == 0 ){
+         $('#judge').val(0)
+     }
+    //-------------------ajax EGT------------------------
+    if (updatehostgroupsId != undefined){//当界面是查看中跳转过来时执行
+        $.ajax({
+            type:"get",
+            data: {'updatehostgroupsId':updatehostgroupsId},
+            url: "http://{{ myhostip }}:8000/main/add_hostgroups/", //后台处理函数的url 这里用的是static url 需要与urls.py中的name一致,或者直接写http地址
+            cache: false,
+            dataType: "json",
+            success: function(data){
+                //返回给前端的值
+                 //alert("已成功！")
+                //alert(data[0])
+                //data不是一个字符串是一对象,需要转换
+                hostgroups=JSON.stringify(data[0])//取数组的第一个字符串，相当于去掉[]
+
+                //alert(hostgroups)
+                var hostgroups2 = JSON.parse(hostgroups)//解析
+                var hostgroupsName=hostgroups2['hostgroupsName']
+                //alert(hostgroupsName)
+                $('#hostgroupsName').val(hostgroupsName)
+                $('#judge').val(1)
+                 //location.reload();//刷新当前页
+                                   },
+            error: function(){
+                 alert("false");
+                              }
+        });
+    }
+
+
+    //-----------------------------------------------
+})
+
+</script>
+
+<script >
+
+	function Submit() {
+	    document.addhostgroups.submit();//提交表单
+           //js是单线程直接提交表单在关闭窗口是不行的，在此做一个ajax，去关闭窗口，后台不用接受数据？
+            $.ajax({
+            type:"get",
+            data: "",
+            url: "http://{{ myhostip }}:8000/main/add_hostgroups/", //后台处理函数的url 这里用的是static url 需要与urls.py中的name一致,或者直接写http地址
+            cache: false,
+            dataType: "text",
+            success: function(data){
+                window.close()
+                                   },
+            error: function(){
+                 alert("false");
+                              }
+        });
+
+
+    }
+
+</script>
+
+    <title>host groups</title>
+</head>
+<body>
+<form id="addhostgroups" name="addhostgroups" method="post" action=""  >
+  {% csrf_token %}
+  <p>Hostgroups name:
+  <input name="hostgroupsName" id="hostgroupsName"  />
+  <textarea name="hostgroupsId" id="hostgroupsId" style="display: none;"></textarea>
+  <textarea name="judge" id="judge" style="display: none;"></textarea>
+  </p>
+  <p>
+    <input type="button" value="Submit"  onclick="Submit();"/>
+{#    <input type="submit"  value="Submit" />#}
+  </p>
+  <p>
+      Added：{{ aa }}
+  </p>
+</form>
+</body>
+</html>

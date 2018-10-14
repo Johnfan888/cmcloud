@@ -1,0 +1,15 @@
+#top{
+    font-size: 30px;
+    font-family: 华文楷体;
+    border-bottom: #639ACA solid 1px;
+
+
+}
+
+#middle{
+    /*background: #f7fcfc;*/
+    height: 100%;
+    width: 80%;
+    left: 20px;
+}
+

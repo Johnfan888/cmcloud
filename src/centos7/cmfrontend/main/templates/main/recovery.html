@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html lang="en">
+<head>
+    {% load staticfiles %}
+    <link rel="stylesheet" type="text/css" href= "{% static 'css/recovery_style.css' %}" />
+<script src="{% static 'js/jquery.js' %}"  type="text/javascript"></script>
+{#    <script src="http://img.jb51.net/jslib/jquery/jquery.js" type="text/javascript"></script>#}
+{#    <script src="{% static 'js/monitoring.js' %}"  type="text/javascript"></script>#}
+ <script>
+     function Processed() {
+         document.getElementById("recovery").style.display = "none"
+         document.getElementById("recovery_new").style.display = ""
+         $("#other_new ").empty("");//直接清除tbody，防止二次查询，第一次数据还在
+         var recovery_new ={{ recovery_new | safe }};//把这个js提出去这里就会报错，不能从后台获取data1
+         var recovery_new = JSON.parse(recovery_new);//解析JSON字符串
+         for (var i = 0; i < recovery_new.length; i++) {
+             //动态创建一个tr行标签,并且转换成jQuery对象
+             var $trTemp = $("<tr></tr>");
+             //往行里面追加 td单元格
+             $trTemp.append("<td >" + recovery_new[i].fields.recoveryDate + " " + recovery_new[i].fields.recoveryTime + "</td>");
+             $trTemp.append("<td id=" + recovery_new[i].pk + ">" + recovery_new[i].fields.actionName + "</td>");
+             $trTemp.append("<td >" + "Trigger status: " + recovery_new[i].fields.triggerStatus + "<br /> "
+                 + "Trigger name: " + recovery_new[i].fields.triggerName +
+                 "</td>");
+             $trTemp.append("<td >" + "Trigger severity: " + recovery_new[i].fields.triggerSeverity + "<br /> "
+                 + "Action name: " + recovery_new[i].fields.actionName + "<br /> "
+                 + "Event ID: " + recovery_new[i].pk + "<br /> "
+                 + "Event value: " + recovery_new[i].fields.eventValue + "<br /> "
+                 + "Event status: " + recovery_new[i].fields.eventStatus + "<br /> "
+                 + "Recovery time: " + recovery_new[i].fields.recoveryTime + "<br /> "
+                 + "Recovery date: " + recovery_new[i].fields.recoveryDate + "<br /> "
+                 + "Item values: " + recovery_new[i].fields.itemValues + "<br /> "
+                 + "Original event ID: " + recovery_new[i].fields.originaleventID + "<br /> "
+                 + "</td>");
+             returnValue_new1 = recovery_new[i].fields.returnValue;
+             if (returnValue_new1 != null) {
+                 returnValue_new1 = eval("(" + returnValue_new1 + ")");
+                 value_new = ""
+                 for (var j = 0; j < returnValue_new1.length; ++j) {
+                     {#alert(returnValue_2[j].actionStepName);#}
+                     {#alert(returnValue_2[j].returnValue);#}
+                     m = j + 1
+                     value_new += "Action Step: " + m + "</br>" + "&nbsp;&nbsp;&nbsp;&nbspReturnValue:" + returnValue_new1[j].returnValue + "</br>";
+
+                 }
+
+                 $trTemp.append("<td >" + value_new + "</td>");//returnvalue
+
+                 //-------------------------------------------------------------------------------------------
+                 $trTemp.appendTo("#other_new");//trtemp加入到表格
+             }
+         }
+     }
+         function Monitoring() {
+             document.getElementById("recovery_new").style.display = "none"
+             document.getElementById("recovery").style.display = ""
+         }
+
+ </script>
+ <script type="text/javascript">
+$(document).ready(function(){
+    $("#other ").empty("");//直接清除tbody，防止二次查询，第一次数据还在
+    var recovery={{ recovery | safe }} ;//把这个js提出去这里就会报错，不能从后台获取data1
+    var recovery = JSON.parse(recovery);//解析JSON字符串
+    for (var i = 0; i < recovery.length; i++) {
+        //动态创建一个tr行标签,并且转换成jQuery对象
+        var $trTemp = $("<tr></tr>");
+        //往行里面追加 td单元格
+        $trTemp.append("<td >" + recovery[i].fields.recoveryDate +" "+ recovery[i].fields.recoveryTime +"</td>");
+        $trTemp.append("<td id=" + recovery[i].pk + ">" + recovery[i].fields.actionName  +"</td>");
+        $trTemp.append("<td >" + "Trigger status: "+recovery[i].fields.triggerStatus +"<br /> "
+                               +"Trigger name: "+recovery[i].fields.triggerName +
+            "</td>");
+        $trTemp.append("<td >" +"Trigger severity: "+ recovery[i].fields.triggerSeverity +"<br /> "
+                               +"Action name: "+ recovery[i].fields.actionName +"<br /> "
+                               +"Event ID: "+ recovery[i].pk +"<br /> "
+                               +"Event value: "+ recovery[i].fields.eventValue +"<br /> "
+                               +"Event status: "+ recovery[i].fields.eventStatus +"<br /> "
+                               +"Recovery time: "+ recovery[i].fields.recoveryTime +"<br /> "
+                               +"Recovery date: "+ recovery[i].fields.recoveryDate +"<br /> "
+                               +"Item values: "+ recovery[i].fields.itemValues +"<br /> "
+                               +"Original event ID: "+ recovery[i].fields.originaleventID +"<br /> "
+           + "</td>");
+        returnValue_1 = recovery[i].fields.returnValue;
+        if(returnValue_1 != null) {
+            returnValue_1 = eval("(" + returnValue_1 + ")");
+            value_new = ""
+            for (var j = 0; j < returnValue_1.length; ++j) {
+                {#alert(returnValue_2[j].actionStepName);#}
+                {#alert(returnValue_2[j].returnValue);#}
+                m = j + 1
+                value_new += "Action Step: " + m + "</br>"  + "&nbsp;&nbsp;&nbsp;&nbspReturnValue:" + returnValue_1[j].returnValue + "</br>";
+
+            }
+
+            $trTemp.append("<td >" + value_new + "</td>");//returnvalue
+        }else {
+            $trTemp.append("<td ></td>");//returnvalue
+        }
+       //-------------------------------------------------------------------------------------------
+        $trTemp.appendTo("#other");//trtemp加入到表格
+    }
+
+})
+</script>
+<style>
+
+.button {
+    border: none;
+    color: white;
+    padding: 13px 29px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 13px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+
+.button {
+    background-color: white;
+    color: black;
+    border: 2px solid #e7e7e7;
+}
+
+.button:hover {background-color: #e7e7e7;}
+
+
+</style>
+
+    <meta name="monitoring" content="Automon" />
+    <title>monitoring</title>
+</head>
+<body>
+<div id="container_monitoring">
+    <div id="top">
+        Recover   <button type="button" id="Processed" class="button" onclick="Processed()">Processed</button> <button type="button" id="Monitoring" class="button" onclick="Monitoring()">Monitoring</button>
+    </div>
+    <div id="middle">
+
+    <table id="recovery" rules="rows" frame="hsides" bordercolor="black" >
+{#    表格加边框，变细#}
+
+        <thead id="first" >
+            <td  style="width:20%" >Time</td>
+            <td  style="width:8%">Action Name</td>
+            <td  style="width:22%">Trigger</td>
+            <td  style="width:30%">Action Descriptions</td>
+            <td  style="width:40%">returnValue</td>
+        </thead>
+
+        <tbody id="other" >
+
+        </tbody>
+
+    </table>
+
+
+      <table id="recovery_new" rules="rows" frame="hsides" bordercolor="black" style="display: none">
+{#    表格加边框，变细#}
+
+        <thead id="first_new" >
+            <td  style="width:20%" >Time</td>
+            <td  style="width:8%">Action Name</td>
+            <td  style="width:22%">Trigger</td>
+            <td  style="width:30%">Action Descriptions</td>
+            <td  style="width:40%">returnValue</td>
+        </thead>
+        <tbody id="other_new" >
+
+        </tbody>
+
+    </table>
+    </div>
+
+</div>
+{#<div>qqqq{{ item }}</div>#}
+</body>
+</html>

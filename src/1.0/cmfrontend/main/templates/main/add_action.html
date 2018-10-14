@@ -226,12 +226,12 @@ function up(a){
     newsids = newsidinfo.split("=");//对获得的参数字符串按照“=”进行分割
     updateactionId = newsids[1];//得到第一个参数值hostid
     //alert(updatehostgroupsId)
-     $('#actionId').val(updateactionId)
+    $('#actionId').val(updateactionId)
      //给后台一个判断添加还是更新的条件
-     var judge=$('#actionName').val()
-     if(judge.length == 0 ){
-         $('#judge').val(0)
-     }
+    var judge=$('#actionName').val()
+    if(judge.length == 0 ){
+        $('#judge').val(0)
+    }
     //-------------------ajax EGT------------------------
     if (updateactionId != undefined){//当界面是查看中跳转过来时执行
         $.ajax({
@@ -253,16 +253,17 @@ function up(a){
                 var actionStepPeriod=action2['actionStepPeriod']
                 var triggerId=action2['triggerId']
                 var actionCommand=action2['actionCommand']
+                var actionMessage=action2['actionMessage']
                 {#var actionStepPeriod=action2['actionStepPeriod']#}
                 //alert(actionStepPeriod)
                 //alert(hostgroupsName)
                 $('#actionName').val(actionName)
-                $('#actionName').attr('disabled',true);
+                $('#actionName').attr('readonly',true);
                 $('#osc').val(actionStepPeriod)
-                $('#osc').attr('disabled',true);
+                //$('#osc').attr('readonly',true);
                 //-----------------------------
                 $('#trigger').val(triggerId)
-                $('#trigger').attr('disabled',true);
+               // $('#trigger').attr('readonly',true);
                 var List={{ data3 | safe }} ;//把这个js提出去这里就会报错，不能从后台获取data1
                 var jsonobj = JSON.parse(List);//解析JSON字符串
                 {#alert(jsonobj)#}
@@ -271,7 +272,7 @@ function up(a){
                     if (jsonobj[i].pk == triggerId) {
                            itemid=jsonobj[i].fields.itemId
                            $('#item').val(itemid)
-                           $('#item').attr('disabled',true);
+                          // $('#item').attr('readonly',true);
 
                         }
                     }
@@ -285,27 +286,35 @@ function up(a){
                     if (itemobj[i].pk == itemid) {
                            hostid=itemobj[i].fields.hostId
                            $('#hostId').val(hostid)
-                           $('#hostId').attr('disabled',true);
+                          // $('#hostId').attr('readonly',true);
 
                         }
                     }
-                {#cc1=actionCommand.split("'")#}
-                {#var reg=/u'([^']*)/g#}
-                {#var m=actionCommand.match(/u'([^']*)/g);#}
-                {#var m=actionCommand.match(/\"(.*?)\"/g);#}
-                {#m=reg.exec(actionCommand)#}
-                {#alert(m.length)#}
-                {#alert(m[1])#}
-                {#alert(m[0])#}
 
 
+                actionCommand=actionCommand.split("\'")//把步骤分开
+                for (var i = 0; i < actionCommand.length; ++i){
+                    actionCommandStep=actionCommand[i].split(",")//分割每条数据
+                    $("#btn1").click();//点击按钮，弹出第一步commands，然后赋值
+                    ii= Number(i)+Number(1)//i是0开始，前端1开始
+                    $("#man"+ii+" input[name='from1']").val(actionCommandStep[0]).attr('readonly',true)//赋值
+                    $("#man"+ii+" input[name='stepduration1']").val(actionCommandStep[1])//赋值
+                    $("#man"+ii+" select[name='OpcommandhostId1']").val(actionCommandStep[2])//赋值
+                    $("#man"+ii+" input[name='Commands1']").val(actionCommandStep[3])//赋值
 
-                {#$("#btn1").click();#}
-                {#$("#btn1").click();#}
-                {#$("#btn2").click();#}
+                }
 
+                actionMessage=actionMessage.split("\'")//把步骤分开
+                for (var j = 0; j < actionMessage.length; ++j){
+                    actionMessageStep=actionMessage[j].split(",")//分割每条数据
+                    $("#btn2").click();//点击按钮，弹出第一步commands，然后赋值
+                    {#alert(Number(ii))#}
+                    iii= Number(ii)+Number(j)+Number(1)//
+                    $("#mas"+iii+" input[name='from2']").val(actionMessageStep[0])//赋值
+                    $("#mas"+iii+" input[name='stepduration2']").val(actionMessageStep[1])
+                    $("#mas"+iii+" select[name='mediatype2']").val(actionMessageStep[2])//赋值
 
-
+                }
 
                 //-------------------------------
                 $('#judge').val(1)
@@ -322,6 +331,29 @@ function up(a){
 })
 
 </script>
+            <script >
+
+	function Submit() {
+	    document.addaction.submit();//提交表单
+           //js是单线程直接提交表单在关闭窗口是不行的，在此做一个ajax，去关闭窗口，后台不用接受数据？
+            $.ajax({
+            type:"get",
+            data: "",
+            url: "http://{{ myhostip }}:8000/main/add_action/", //后台处理函数的url 这里用的是static url 需要与urls.py中的name一致,或者直接写http地址
+            cache: false,
+            dataType: "text",
+            success: function(data){
+                window.close()
+                                   },
+            error: function(){
+                 alert("false");
+                              }
+        });
+
+
+    }
+
+</script>
     <meta http-equiv="Content-Type" content="text/html" charset="utf-8">
     <title>action</title>
 </head>
@@ -331,8 +363,8 @@ function up(a){
 {#  防止跨站攻击所做的保护#}
   <p>Action name:
   <input id="actionName" name="actionName" type="text" />
-  <textarea name="actionId" id="actionId" style="display: none;"></textarea>
-  <textarea name="judge" id="judge" style="display: none;"></textarea>
+  <textarea name="actionId" id="actionId" style="display: none"></textarea>
+  <textarea name="judge" id="judge" style="display: none"></textarea>
   </p>
   <p>Host:
     <label>
@@ -341,6 +373,7 @@ function up(a){
             <option value="{{ host.hostId }}" id="{{ host.hostIp }}">{{ host.hostName }}</option>
             {% endfor %}
   </select>
+
     </label>
   </p>
   <p>items:
@@ -364,13 +397,14 @@ function up(a){
   <p>Default Operation Step Duration:
     <label>
         <select name="osc" id="osc">
-            {% for host in host %}
+{#            {% for host in host %}#}
             <option value="60" >60s</option>
             <option value="120" >120s</option>
             <option value="1200" >1200s</option>
             <option value="3600" >3600s</option>
+{#            <option value="3600" >0s</option>    #}
 
-            {% endfor %}
+{#            {% endfor %}#}
         </select>
 {#        <input id="osc" name="osc" type="text" />#}
     </label>
@@ -382,7 +416,7 @@ function up(a){
 </p>
 <div id='div2'></div>
   <p>
-    <input type="submit" name="Submit" value="Submit" onclick="window.close()" />
+    <input type="button" value="Submit"  onclick="Submit();"/>
   </p>
   <p>
       Added：{{ action_data }}
@@ -397,10 +431,10 @@ function up(a){
   <p>Operation type:  Remote command
   </p>
   <p>
-      step<input style="width:50px;" name="from1"/>
+      step<input style="width:50px;" id="from1" name="from1"/>
   </p>
   <p>
-      Step Duration<input style="width:50px;" name="stepduration1"/>(minimum 60 seconds, 0 - use action default)
+      Step Duration<input style="width:50px;"  id="stepduration1" name="stepduration1"/>(minimum 60 seconds, 0 - use action default)
   </p>
   Opcommand host:
 
@@ -420,7 +454,7 @@ function up(a){
   <input type="button" id="open" value="Edit Script" onclick="opendialog()" />
   <p>Commands:
   <input id="commands1" name="Commands1" type="text" style="width:400px"/>
-  <textarea id="sname" name="sname" style="display: none;"></textarea>
+  <textarea id="sname" name="sname" style="display: none;" ></textarea>
   <textarea id="text1" name="text1" rows="3" cols="20" style="display: none;"></textarea>
   </p>
 <br />
@@ -434,13 +468,13 @@ function up(a){
   <p>Operation type:  Send message
   </p>
   <p>
-      step<input style="width:50px;" name="from2"/>
+      step<input style="width:50px;" id="from2" name="from2"/>
   </p>
   <p>
-      Step duration<input style="width:50px;" name="stepduration2"/>(minimum 60 seconds, 0 - use action default)
+      Step duration<input style="width:50px;" id="stepduration2" name="stepduration2"/>(minimum 60 seconds, 0 - use action default)
   </p>
-  <p>mediatype
-      <select name="mediatype2">
+  <p>Mediatype
+      <select name="mediatype2" id="mediatype2">
           <option value="4">163-Email</option>
           <option value="2">local</option>
       </select>
@@ -457,10 +491,11 @@ function up(a){
 import commands
 import yaml
 import os
+import datetime
+time= datetime.datetime.now().strftime("%Y.%m.%d %H:%M:%S")
 output= commands.getoutput('sh /etc/zabbix/script/A.sh')
 fr = open('/etc/zabbix/script/return.yaml',"a+")
-data ={'A':{'step':'1','value':output}}
-print data
+data ={'A':{'step':'1','value':output,'time':time}}
 yaml.dump(data,fr)
 fr.close()
 os.system("nc E 8899 < /etc/zabbix/script/return.yaml")
@@ -470,14 +505,15 @@ os.system("nc E 8899 < /etc/zabbix/script/return.yaml")
 import yaml
 import commands
 import os
+import datetime
+time = datetime.datetime.now().strftime("%Y.%m.%d %H:%M:%S")
 fr = open('/etc/zabbix/script/return.yaml',"r")
-aa= yaml.load(fr)
-bb=aa['DC']
+data= yaml.load(fr)
+data1=data['DC']
 fr.close()
-cc=bb['value']
-output=commands.getoutput('sh /etc/zabbix/script/A.sh %s' %(cc))
-data={'A':{'step':'B','value':output}}
-print data
+data_value=data1['value']
+output=commands.getoutput('sh /etc/zabbix/script/A.sh %s' %(data_value))
+data={'A':{'step':'B','value':output,'time':time}}
 fr1 = open('/etc/zabbix/script/return.yaml',"a+")
 yaml.dump(data,fr1)
 fr1.close()

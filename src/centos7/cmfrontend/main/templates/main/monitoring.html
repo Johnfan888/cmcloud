@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html lang="en">
+<head>
+    {% load staticfiles %}
+<script src="{% static 'js/jquery.js' %}"  type="text/javascript"></script>
+{#    <script src="http://img.jb51.net/jslib/jquery/jquery.js" type="text/javascript"></script>#}
+    <link rel="stylesheet" type="text/css" href= "{% static 'css/monitoring_style.css' %}" />
+{#    <script src="{% static 'js/monitoring.js' %}"  type="text/javascript"></script>#}
+<script>//显示当前查询主机
+    $(document).ready(function(){
+        $("#ok").click(function() {
+            var c=$("#host1 option:selected").text();//获取one的val
+         {#alert(c)#}
+            var select = document.getElementById("hostname");
+            select.innerHTML = c
+        })
+        })
+</script>
+<script type="text/javascript">//动态添加表格并按条件修改
+$(document).ready(function(){
+    $("#ok").click(function() {
+        $("#other ").empty("");//直接清除tbody，防止二次查询，第一次数据还在
+           var List1={{ data1 | safe }} ;//把这个js提出去这里就会报错，不能从后台获取data1
+           var item = JSON.parse(List1);//解析JSON字符串
+           var List2={{ data3 | safe }} ;//把这个js提出去这里就会报错，不能从后台获取data1
+           var template = JSON.parse(List2);//解析JSON字符串
+           var checkValue=$("#host1").val();//获取one的val
+
+
+                    // 动态创建表格的方式，使用动态创建dom对象的方式
+                    //清空所有的子节点
+                    //$("#other").empty();
+                    for (var i = 0; i < item.length; i++) {
+                        if (item[i].fields.hostId == checkValue) {
+                            //动态创建一个tr行标签,并且转换成jQuery对象
+                            var $trTemp = $("<tr></tr>");
+
+                            //往行里面追加 td单元格
+                            $trTemp.append("<td>" + item[i].fields.itemName + "</td>");
+                            $trTemp.append("<td>" + item[i].fields.itemKey + "</td>");
+                            //$trTemp.append("<td>" + item[i].fields.templateId + "</td>");
+
+                            if (item[i].fields.itemStatus == 0) {//判断条件
+                                a = "Enabled"
+
+                                $trTemp.append("<td style=\"color:#1cff0a\">" + a + "</td>");
+                            }
+                            else {
+                                a = "Disabled"
+                                $trTemp.append("<td style=\"color:#ff0a11\">" + a + "</td>");
+                            }
+                            $trTemp.appendTo("#other");
+                        }
+
+                    }
+        })
+     })
+</script>
+
+
+    <meta name="monitoring" content="Automon" />
+    <title>monitoring</title>
+</head>
+<body>
+<div id="container_monitoring">
+    <div id="top">
+        Item
+    </div>
+<form id="host" name="host" method="post" action="">
+{% csrf_token %}
+    <div id="set">
+    <p>选择你要查询的主机</p>
+    <p>Host:
+    <label>
+    <select id="host1"  name="hostId">
+            {#循环取出host中的hostid和hostname  #}
+            {% for host in host %}
+            <option value="{{ host.hostId }}" >{{ host.hostName }}</option>
+            {% endfor %}
+    </select>
+    </label>
+{#    <input type="submit" id="ok" value="ok" />当前查询主机   <a id="hostname" ></a>#}
+    <button type="button" id="ok" >ok</button>  当前查询主机   <a id="hostname" ></a>
+    </p>
+
+    </div>
+</form>
+    <div id="middle">
+    <table id="items" style="width:90%" rules="rows" frame="hsides" bordercolor="black">
+        <thead id="first" >
+            <td id="a" style="width:25%">Name</td>
+            <td id="b" style="width:40%">Key</td>
+{#            <td id="c" style="width:20%">templateName</td>#}
+            <td id="d" style="width:5%">status</td>
+        </thead>
+
+        <tbody id="other">
+
+        </tbody>
+
+    </table>
+    </div>
+
+</div>
+{#<div>{{ data1 }}</div>#}
+</body>
+</html>

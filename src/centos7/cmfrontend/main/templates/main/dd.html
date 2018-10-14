@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html>
+<body>
+<p>请输入两个数字</p>
+<form >
+    a: <input type="text" id="a" name="a"> <br>
+    b: <input type="text" id="b" name="b"> <br>
+    <p>result: <span id='result'></span></p>
+    <button type="button" id='sum'>提交</button>
+</form>
+
+<script src="http://img.jb51.net/jslib/jquery/jquery.js"></script>
+    <script>
+    $(document).ready(function(){
+      $("#sum").click(function(){
+        var a = $("#a").val();
+        var b = $("#b").val();
+        $.ajax({
+            type:"GET",
+            url:"/dd/",
+            data:{"a":a, "b":b},
+            data_type:"json",
+            success: function(ret){
+                    $('#result').html(ret.result)
+                     }
+        })
+      });
+    });
+    </script>
+</body>
+</html>
