@@ -9,9 +9,9 @@ class chost(models.Model):
     hostId = models.IntegerField(primary_key=True, max_length=8)
     hostName = models.CharField(max_length=255)
     hostStatus = models.IntegerField(max_length=2)
-    hostgroupsId = models.IntegerField(max_length=8)
+    hostgroupsId = models.IntegerField(null=True,max_length=8)
     templatesId = models.IntegerField(null=True,max_length=10)
-    hostIp = models.CharField(max_length=255)
+    hostIp = models.CharField(null=True,max_length=255)
 
 
     # 返回相应的值
@@ -30,7 +30,7 @@ class chostgroups(models.Model):
 class ctemplates(models.Model):
     templatesId = models.IntegerField(primary_key=True, max_length=8)
     templatesName = models.CharField(max_length=255)
-    hostgroupsId = models.IntegerField(max_length=8)
+    hostgroupsId = models.IntegerField(null=True,max_length=8)
     # 返回相应的值
     def __unicode__(self):
          # return self.templatesId
@@ -63,7 +63,7 @@ class citem(models.Model):
     itemStatus = models.IntegerField(max_length=1)
     # templateId = models.IntegerField(null=True,max_length=10)
     hostId = models.IntegerField(max_length=10)
-    interfaceId = models.IntegerField(max_length=8)
+    interfaceId = models.IntegerField(null=True,max_length=8)
     valuetype = models.IntegerField(null=True,max_length=2)
     datatype = models.IntegerField(null=True,max_length=2)
     units = models.CharField(null=True,max_length=255)
@@ -82,7 +82,7 @@ class ctrigger(models.Model):
     triggerPriority = models.IntegerField(max_length=10)
     itemId = models.IntegerField(max_length=10)
     triggerDescription = models.CharField(null=True,max_length=255)
-    condition = models.CharField(null=True,max_length=10000)
+    condition = models.CharField(null=True,max_length=255)
     # 返回相应的值
     def __unicode__(self):
          return self.triggerId
@@ -93,14 +93,14 @@ class crecovery(models.Model):
     recoveryDate = models.CharField(max_length=255)
     actionName = models.CharField(max_length=255)
     triggerStatus = models.CharField(max_length=50)
-    itemValues = models.CharField(max_length=255)
+    itemValues = models.CharField(max_length=50)
     triggerSeverity = models.CharField(max_length=50)
     eventId = models.IntegerField(primary_key=True)
     eventStatus= models.CharField(max_length=10)
     eventValue = models.IntegerField(max_length=10)
     originaleventID = models.IntegerField(max_length=10)
     triggerName = models.CharField(max_length=255)
-    returnValue = models.CharField(null=True,max_length=1000)
+    returnValue = models.CharField(null=True,max_length=255)
     # 返回相应的值
     def __unicode__(self):
          return self.eventId
@@ -110,14 +110,14 @@ class crecovery_old(models.Model):
     recoveryDate = models.CharField(max_length=255)
     actionName = models.CharField(max_length=255)
     triggerStatus = models.CharField(max_length=50)
-    itemValues = models.CharField(max_length=255)
+    itemValues = models.CharField(max_length=50)
     triggerSeverity = models.CharField(max_length=50)
     eventId = models.IntegerField(primary_key=True)
     eventStatus= models.CharField(max_length=10)
     eventValue = models.IntegerField(max_length=10)
     originaleventID = models.IntegerField(max_length=10)
     triggerName = models.CharField(max_length=255)
-    returnValue = models.CharField(null=True,max_length=1000)
+    returnValue = models.CharField(null=True,max_length=255)
 
     # 返回相应的值
     def __unicode__(self):
@@ -128,14 +128,14 @@ class crecovery_new(models.Model):
     recoveryDate = models.CharField(max_length=255)
     actionName = models.CharField(max_length=255)
     triggerStatus = models.CharField(max_length=50)
-    itemValues = models.CharField(max_length=255)
+    itemValues = models.CharField(max_length=50)
     triggerSeverity = models.CharField(max_length=50)
     eventId = models.IntegerField(primary_key=True)
     eventStatus= models.CharField(max_length=10)
     eventValue = models.IntegerField(max_length=10)
     originaleventID = models.IntegerField(max_length=10)
     triggerName = models.CharField(max_length=255)
-    returnValue = models.CharField(null=True,max_length=1000)
+    returnValue = models.CharField(null=True,max_length=255)
     # 返回相应的值
     def __unicode__(self):
          return self.eventId
@@ -144,7 +144,7 @@ class caction(models.Model):
     actionId = models.IntegerField(primary_key=True, max_length=8)
     actionName = models.CharField(max_length=255)
     actionStatus = models.IntegerField( max_length=8)
-    actionStepPeriod = models.CharField(max_length=255)
+    actionStepPeriod = models.CharField(null=True,max_length=255)
     triggerId = models.IntegerField(null=True,max_length=8)
     actionCommand = models.CharField(null=True,max_length=255)
     actionMessage = models.CharField(null=True, max_length=255)
